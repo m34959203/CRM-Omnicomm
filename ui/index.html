@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omnicomm Alliance KZ — CRM мониторинга транспорта</title>
+<style>
+  :root{--bg:#0b1220;--card:#121b2e;--line:#1f2c47;--ink:#e8eefc;--mut:#8aa0c6;--acc:#3da5ff;--ok:#34d399}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:
+    radial-gradient(1200px 600px at 80% -10%,#16335c33,transparent),var(--bg);color:var(--ink);min-height:100vh}
+  .wrap{max-width:960px;margin:0 auto;padding:64px 24px}
+  .badge{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:28px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+  h1{font-size:clamp(28px,5vw,44px);margin:0 0 14px;letter-spacing:-.02em}
+  .sub{color:var(--mut);font-size:18px;max-width:640px;line-height:1.6;margin:0 0 40px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:24px;transition:.2s}
+  a.card:hover{border-color:var(--acc);transform:translateY(-3px)}
+  a.card h3{margin:0 0 8px;font-size:18px}
+  a.card p{margin:0;color:var(--mut);font-size:14px;line-height:1.5}
+  .arrow{margin-top:16px;color:var(--acc);font-size:14px;font-weight:600}
+  footer{margin-top:48px;color:var(--mut);font-size:13px;border-top:1px solid var(--line);padding-top:24px}
+  code{background:#0008;padding:2px 8px;border-radius:6px;color:var(--acc)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge"><span class="dot"></span> Демо · API онлайн</span>
+    <h1>Omnicomm Alliance KZ</h1>
+    <p class="sub">CRM мониторинга транспорта: клиенты, объекты, заявки и контроль монтажников
+      со сквозным потоком «продажа → наряд → Акт ТО → биллинг». Ниже — кликабельные прототипы.</p>
+    <div class="grid">
+      <a class="card" href="/dashboard-omnicomm.html">
+        <h3>Рабочий стол</h3>
+        <p>Дашборд по макету заказчика: статусы заявок, нагрузка, метрики.</p>
+        <div class="arrow">Открыть →</div>
+      </a>
+      <a class="card" href="/prototype-crm.html">
+        <h3>Кликабельный прототип</h3>
+        <p>Все разделы CRM с живыми настройками — навигация, формы, списки.</p>
+        <div class="arrow">Открыть →</div>
+      </a>
+      <a class="card" href="/roadmap-crm.html">
+        <h3>Дорожная карта</h3>
+        <p>Этапы проекта и охват ТЗ Omnicomm Alliance KZ.</p>
+        <div class="arrow">Открыть →</div>
+      </a>
+    </div>
+    <footer>
+      Живой API: <code>/api/health</code> · <code>/api/meta</code>. Демо-доступ (пароль <code>demo1234</code>):
+      admin@ / manager@ / support@ / installer@ / boss@omnicomm.kz
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omnicomm CRM — дорожная карта</title>
+<style>
+  :root{--navy:#1f3864;--navy2:#16294a;--blue:#2e75b6;--blue-l:#5b9bd5;--bg:#eef2f8;--card:#fff;--line:#e2e8f0;--text:#1e293b;--muted:#64748b;--green:#16a34a;--green-bg:#dcfce7;--amber:#d97706;--amber-bg:#fef3c7;--gray-bg:#eef2f7;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Segoe UI,sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding:34px 20px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .head{text-align:center;margin-bottom:8px}
+  .head .logo{font-size:24px;font-weight:bold;color:var(--navy);letter-spacing:1px}
+  .head .logo span{color:var(--blue-l)}
+  h1{color:var(--navy);font-size:27px;margin:6px 0 4px}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:18px;text-align:center}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;border-top:3px solid var(--blue)}
+  .stat .v{font-size:26px;font-weight:bold;color:var(--navy)}
+  .stat .l{font-size:12px;color:var(--muted);margin-top:3px}
+  .legend{display:flex;gap:16px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .d-done{background:var(--green)}.d-prog{background:var(--amber)}.d-plan{background:#94a3b8}
+  .foundation{background:linear-gradient(135deg,#1f3864,#2e75b6);color:#fff;border-radius:14px;padding:20px 22px;margin-bottom:26px}
+  .foundation h3{font-size:16px;margin-bottom:4px}
+  .foundation p{font-size:13px;opacity:.85;margin-bottom:12px}
+  .fchips{display:flex;flex-wrap:wrap;gap:8px}
+  .fchip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:5px 12px;font-size:12.5px}
+  .timeline{position:relative;margin-left:26px;border-left:3px solid #cdd8ea;padding-left:0}
+  .phase{position:relative;margin-bottom:22px;padding-left:34px}
+  .phase:before{content:'';position:absolute;left:-12px;top:4px;width:21px;height:21px;border-radius:50%;background:var(--green);border:4px solid var(--bg)}
+  .phase.prog:before{background:var(--amber)}
+  .phase.plan:before{background:#94a3b8}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .phd{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);background:#fafbfd}
+  .pnum{width:30px;height:30px;border-radius:8px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;flex-shrink:0}
+  .pht{flex:1}
+  .pht .t{font-weight:bold;color:var(--navy);font-size:15px}
+  .pht .s{font-size:12px;color:var(--muted)}
+  .badge{font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;white-space:nowrap}
+  .b-done{background:var(--green-bg);color:var(--green)}
+  .b-prog{background:var(--amber-bg);color:var(--amber)}
+  .b-plan{background:#e2e8f0;color:#475569}
+  .feat{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}
+  .fi{display:flex;gap:9px;font-size:13px;align-items:flex-start}
+  .fi .ic{color:var(--blue);font-weight:bold;flex-shrink:0}
+  .fi .ic.plan{color:#94a3b8}
+  .tech{font-size:11.5px;color:var(--muted);padding:0 18px 13px;font-style:italic}
+  .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+  @media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}.feat{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><div class="logo">OMNI<span>COMM</span></div></div>
+  <h1>CRM мониторинга транспорта — дорожная карта</h1>
+  <div class="sub">Сквозной процесс: обращение → заявка → выезд → монтаж → биллинг → аналитика. На базе LiftPlatform (open-source).</div>
+
+  <div class="stats">
+    <div class="stat"><div class="v">6</div><div class="l">функциональных фаз</div></div>
+    <div class="stat"><div class="v">27/27</div><div class="l">разделов ТЗ закрыто</div></div>
+    <div class="stat"><div class="v">20+</div><div class="l">API-модулей</div></div>
+    <div class="stat"><div class="v">12</div><div class="l">миграций БД</div></div>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot d-done"></span> Готово</span>
+    <span><span class="dot d-prog"></span> Доработка/настройка</span>
+    <span><span class="dot d-plan"></span> В планах</span>
+  </div>
+
+  <div class="foundation">
+    <h3>⬢ Фундамент — LiftPlatform (переиспользование)</h3>
+    <p>Готовая продакшн-база: тот же стек, что и для кастома, с продакшн-качеством и тестами.</p>
+    <div class="fchips">
+      <span class="fchip">Next.js 16 + React 19 + TypeScript</span>
+      <span class="fchip">PostgreSQL (raw SQL)</span>
+      <span class="fchip">JWT + RBAC (7 ролей)</span>
+      <span class="fchip">Аудит действий</span>
+      <span class="fchip">Уведомления SSE + email</span>
+      <span class="fchip">Документы</span>
+      <span class="fchip">PWA офлайн</span>
+      <span class="fchip">i18n (ru/kz/en)</span>
+      <span class="fchip">Docker + CI</span>
+    </div>
+  </div>
+
+  <div class="timeline" id="tl"></div>
+
+  <div class="foot">ТОО «Omnicomm Alliance KZ» · дорожная карта проекта · функционал по фазам</div>
+</div>
+
+<script>
+const D='<span class="ic">✓</span>', P='<span class="ic plan">○</span>';
+const PHASES=[
+  {n:1,t:"Базовая CRM",s:"Учёт обращений и заявок",badge:"done",tech:"incidents + organizations + RBAC · migration-020",
+   feats:[[D,"Карточки клиентов и объектов"],[D,"Заявки: 16 типов, 14 статусов"],[D,"Назначение ответственных"],[D,"Неизменяемая история действий"],[D,"Рабочий стол с KPI"],[D,"Фильтрация и поиск"]]},
+  {n:2,t:"Контроль монтажников",s:"Полевой сервис с гео и фото",badge:"done",tech:"visit_steps + maintenance · migration-017",
+   feats:[[D,"Этапы выезда: выехал/прибыл/начал/завершил"],[D,"Геолокация на каждом этапе"],[D,"Обязательный фотоотчёт"],[D,"Календарь выездов"],[D,"Мобильная панель монтажника (PWA)"],[D,"Отчёт по монтажникам"]]},
+  {n:3,t:"Интеграция коммуникаций",s:"Все каналы обращений",badge:"done",tech:"calls + client_messages · migration-018",
+   feats:[[D,"IP-телефония: звонки → карточка клиента"],[D,"WhatsApp / Telegram / email / сайт"],[D,"Авто-создание заявок из обращений"],[D,"Авто-привязка по номеру/email"],[D,"История переписки"],[D,"Отчёт по каналам связи"]]},
+  {n:4,t:"Финансы и абонплата",s:"Рекуррентный доход (MRR)",badge:"done",tech:"subscriptions + tariffs · migration-019,024",
+   feats:[[D,"Иерархия тарифов: общий → клиент → объект"],[D,"Абонплата: подписка"],[D,"Биллинг по активности (дни «Активен»)"],[D,"Счета со статусами и просрочкой"],[D,"Cron-начисление за период"],[D,"Отчёт по абонплате"]]},
+  {n:5,t:"Склад и оборудование",s:"От заказ-наряда до Акта ТО",badge:"done",tech:"equipment + work_orders + acts · migration-022,023",
+   feats:[[D,"Склад + Исполнитель (закрепление за техником)"],[D,"Статусы: Новое / Б/У / демо / Активен"],[D,"Заказ-наряд с бригадой"],[D,"Акт ТО → триггер биллинга"],[D,"Списание материалов (пломбы, SIM)"],[D,"Рекурсивная доработка → авто-заявка"]]},
+  {n:6,t:"Аналитика и мотивация",s:"Управляемость и выплаты",badge:"done",tech:"reports + payroll · migration-024",
+   feats:[[D,"Отчёты: заявки, клиенты, каналы, сотрудники"],[D,"Мотивация техников: сдельно + порог"],[D,"Учёт ГСМ и удержаний"],[D,"Выгрузка для Power BI"],[D,"Экспорт в Excel"],[D,"Дашборды руководства"]]},
+  {n:7,t:"Продажи, SIM, RMA, биллинг-детали",s:"Адаптация функций из демо вендора",badge:"done",tech:"sales_orders + sim_cards + equipment ops · migration-025..028",feats:[[D,"Заказ клиента + порядок отгрузки (без/при/до установки)"],[D,"SIM-карты: оприходование, импорт, остатки"],[D,"Операции с оборуд.: состояние/перевод/снятие/регистрация"],[D,"RMA: приём от клиента, передача поставщику"],[D,"Сделка: категории, расценки, компенсации, удержания, оклад+порог"],[D,"Абонплата: скидки, аванс/кредит"],[D,"Преимущества: единый отчёт по оборуд., авто-блок по долгу"]]},
+{n:8,t:"Коннекторы и UI-доработки",s:"Остаточные задачи",badge:"plan",tech:"планируется",
+   feats:[[P,"Заказ клиента и счёт (продажи)"],[P,"Типы отгрузки: без / при / до установки"],[P,"Реальный коннектор Wialon / Omnicomm"],[P,"Синхронизация с 1С:Бухгалтерия"],[P,"Drag-and-drop планировщик нарядов"],[P,"Заказ на тестирование (демо-оборудование)"]]},
+];
+const BC={done:"b-done",prog:"b-prog",plan:"b-plan"};
+const BT={done:"Готово",prog:"Доработка",plan:"В планах"};
+const PC={done:"",prog:"prog",plan:"plan"};
+document.getElementById("tl").innerHTML=PHASES.map(p=>`
+  <div class="phase ${PC[p.badge]}">
+    <div class="pcard">
+      <div class="phd">
+        <div class="pnum">${p.n}</div>
+        <div class="pht"><div class="t">${p.t}</div><div class="s">${p.s}</div></div>
+        <span class="badge ${BC[p.badge]}">${BT[p.badge]}</span>
+      </div>
+      <div class="feat">${p.feats.map(f=>`<div class="fi">${f[0]}<span>${f[1]}</span></div>`).join("")}</div>
+      <div class="tech">Реализация: ${p.tech}</div>
+    </div>
+  </div>`).join("");
+</script>
+</body>
+</html>

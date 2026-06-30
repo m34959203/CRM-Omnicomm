@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Омникомм Alliance KZ — Рабочий стол</title>
+<style>
+  :root{--navy:#15233f;--navy2:#0f1a30;--blue:#2f6df0;--blue-d:#1e54c8;--bg:#eef1f6;--card:#fff;--line:#e6eaf1;--text:#1f2937;--muted:#7a869a;
+    --green:#22c55e;--amber:#f59e0b;--purple:#8b5cf6;--teal:#06b6d4;--red:#ef4444;--cyan:#0ea5e9;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+  .app{display:flex;min-height:100vh}
+  /* sidebar */
+  .side{width:232px;background:var(--navy);color:#aebbd4;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .brand .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2f6df0,#0ea5e9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:16px}
+  .brand b{color:#fff;font-size:15px;letter-spacing:.5px;line-height:1}
+  .brand span{display:block;font-size:9.5px;color:#7e8db0;letter-spacing:2px}
+  .nav{padding:8px 0;flex:1;overflow:auto}
+  .nav a{display:flex;align-items:center;gap:11px;padding:9px 20px;color:#aebbd4;font-size:13px;cursor:pointer;border-left:3px solid transparent;text-decoration:none}
+  .nav a:hover{background:rgba(255,255,255,.05);color:#fff}
+  .nav a.active{background:var(--blue);color:#fff;border-left-color:#9cc0ff}
+  .nav .ic{width:18px;text-align:center;font-size:14px;opacity:.95}
+  .nav .bdg{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;font-weight:bold}
+  .sfoot{padding:14px 20px;border-top:1px solid rgba(255,255,255,.07);font-size:10.5px;color:#7e8db0;line-height:1.5}
+  .sfoot b{color:#cfd9ec;font-size:12px;display:block;margin-bottom:3px}
+  .collapse{padding:10px 20px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:#9fb0d0;cursor:pointer}
+  /* main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .top{background:#fff;border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:5}
+  .top h1{font-size:18px;color:#1b2a4a}
+  .search{flex:1;max-width:420px;position:relative}
+  .search input{width:100%;padding:9px 14px 9px 34px;border:1px solid var(--line);border-radius:9px;background:#f6f8fb;font-size:13px}
+  .search:before{content:'🔍';position:absolute;left:11px;top:8px;font-size:12px;opacity:.5}
+  .top .sp{margin-left:auto}
+  .tbtn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:9px;font-size:13px;cursor:pointer;border:none}
+  .tbtn.pri{background:var(--blue);color:#fff}
+  .ticon{position:relative;width:38px;height:38px;border-radius:9px;background:#f3f6fb;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+  .ticon .bdg{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:10px;font-size:9px;padding:0 5px;font-weight:bold;line-height:15px}
+  .me{display:flex;align-items:center;gap:9px;cursor:pointer}
+  .me .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#2f6df0,#0ea5e9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
+  .me b{font-size:13px;display:block} .me span{font-size:11px;color:var(--muted)}
+  .content{padding:20px 24px;overflow:auto}
+  .toolbar{display:flex;justify-content:flex-end;gap:12px;margin-bottom:16px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 13px;font-size:13px;cursor:pointer}
+  /* kpis */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px}
+  .kpi .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;margin-bottom:11px}
+  .kpi .l{font-size:11.5px;color:var(--muted)}
+  .kpi .v{font-size:25px;font-weight:700;color:#1b2a4a;line-height:1.1;margin:2px 0 5px}
+  .kpi .t{font-size:11px}
+  .up{color:var(--green)} .down{color:var(--red)}
+  .grid{display:grid;gap:16px;margin-bottom:16px}
+  .g3{grid-template-columns:1.25fr 1fr 1fr}
+  .g3b{grid-template-columns:1.3fr 1fr 1fr}
+  .g2{grid-template-columns:1.7fr 1fr}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;display:flex;flex-direction:column}
+  .ch{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .ch h3{font-size:14px;color:#1b2a4a}
+  .ch .more{font-size:12px;color:var(--blue);cursor:pointer}
+  .ch .cnt{background:#eef2f9;color:#5a6b8c;border-radius:9px;font-size:11px;padding:1px 8px;margin-left:7px}
+  .cb{padding:16px 18px;flex:1}
+  .lnk{padding:11px 18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--blue);cursor:pointer;display:flex;justify-content:space-between}
+  /* donut */
+  .donut-wrap{display:flex;align-items:center;gap:16px}
+  .legend{flex:1}
+  .lrow{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:4px 0}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .lrow .nm{color:#33415c}
+  .lrow .vl{margin-left:auto;font-weight:600;color:#1b2a4a}
+  .lrow .pc{color:var(--muted);width:46px;text-align:right;font-size:11.5px}
+  /* tasks */
+  .task{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f4f9;font-size:12.5px}
+  .task .box{width:16px;height:16px;border:1.5px solid #c3cdde;border-radius:4px;flex-shrink:0}
+  .task.done .box{background:var(--green);border-color:var(--green);position:relative}
+  .task.done .box:after{content:'✓';color:#fff;font-size:11px;position:absolute;left:2px;top:-2px}
+  .task.done .nm{color:#9aa6b8;text-decoration:line-through}
+  .task .tm{margin-left:auto;color:var(--muted);font-size:11px}
+  /* alerts */
+  .al{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid #f1f4f9}
+  .al .d{width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0}
+  .al .nm{font-size:12.5px;color:#33415c} .al .sub{font-size:11px;color:var(--muted)}
+  .al .big{margin-left:auto;font-weight:700;font-size:15px}
+  /* bars */
+  .bar{margin-bottom:11px}
+  .bar .top2{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+  .bar .track{height:8px;background:#eef2f8;border-radius:6px;overflow:hidden}
+  .bar .fill{height:100%;background:var(--blue);border-radius:6px}
+  /* workload */
+  .wl{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .wl .av{width:30px;height:30px;border-radius:50%;background:#dde6f5;color:#3b5a92;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex-shrink:0}
+  .wl .nm{font-size:12.5px;width:78px}
+  .wl .track{flex:1;height:8px;background:#eef2f8;border-radius:6px;overflow:hidden}
+  .wl .fill{height:100%;background:linear-gradient(90deg,#2f6df0,#0ea5e9);border-radius:6px}
+  .wl .vl{width:24px;text-align:right;font-weight:600;font-size:12px}
+  /* table */
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;padding:9px 18px;border-bottom:1px solid var(--line)}
+  td{padding:11px 18px;border-bottom:1px solid #f3f6fb;font-size:12.5px}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600}
+  .s-work{background:#fff3df;color:#b4730b}.s-wait{background:#e7f0ff;color:#2257c4}.s-new{background:#e7f7ec;color:#1c8e43}.s-sup{background:#efe9fd;color:#6c40d6}
+  .num{color:var(--blue);font-weight:600}
+  /* quick */
+  .qa{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #f3f6fb;cursor:pointer;font-size:13px}
+  .qa:hover{background:#f8fafd}
+  .qa .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+  @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.g3,.g3b,.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="mark">O</div><div><b>ОМНИКОММ</b><span>ALLIANCE KZ</span></div></div>
+    <nav class="nav">
+      <a class="active"><span class="ic">▦</span> Рабочий стол</a>
+      <a><span class="ic">▤</span> Заявки</a>
+      <a><span class="ic">◍</span> Клиенты</a>
+      <a><span class="ic">⌗</span> Оборудование</a>
+      <a><span class="ic">◎</span> Мониторинг</a>
+      <a><span class="ic">▣</span> Проекты</a>
+      <a><span class="ic">⛑</span> Поддержка</a>
+      <a><span class="ic">▥</span> База знаний</a>
+      <a><span class="ic">▢</span> Документы</a>
+      <a><span class="ic">₸</span> Платежи</a>
+      <a><span class="ic">▥</span> Отчёты и BI</a>
+      <a><span class="ic">☷</span> Сотрудники</a>
+      <a><span class="ic">▦</span> Календарь</a>
+      <a><span class="ic">✉</span> Почта</a>
+      <a><span class="ic">🔔</span> Уведомления <span class="bdg">3</span></a>
+      <a><span class="ic">⚙</span> Настройки</a>
+    </nav>
+    <div class="sfoot"><b>Омникомм Alliance KZ</b>Телематика · IoT · Мониторинг · Аналитика · Внедрение решений</div>
+    <div class="collapse">‹ Свернуть меню</div>
+  </aside>
+
+  <div class="main">
+    <div class="top">
+      <h1>Рабочий стол</h1>
+      <div class="search"><input placeholder="Поиск по CRM..."></div>
+      <div class="sp"></div>
+      <button class="tbtn pri">＋ Добавить</button>
+      <div class="ticon">✉<span class="bdg">3</span></div>
+      <div class="ticon">🔔<span class="bdg">3</span></div>
+      <div class="me"><div class="av">ЕА</div><div><b>Ерлан Айтбаев</b><span>Руководитель</span></div></div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="chip">🗓 01.05.2024 – 31.05.2024 ▾</div>
+        <button class="tbtn pri">↻ Обновить ▾</button>
+      </div>
+
+      <div class="kpis" id="kpis"></div>
+
+      <div class="grid g3">
+        <div class="card">
+          <div class="ch"><h3>Заявки по статусам</h3></div>
+          <div class="cb"><div class="donut-wrap"><div id="donut"></div><div class="legend" id="donutLegend"></div></div></div>
+          <div class="lnk"><span>Подробнее</span><span>›</span></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Мои задачи <span class="cnt">6</span></h3><span class="more">Все задачи</span></div>
+          <div class="cb" id="tasks"></div>
+          <div class="lnk"><span>Открыть список задач</span><span>›</span></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Срочные уведомления</h3><span class="cnt" style="background:#fdeaea;color:#d23">3</span></div>
+          <div class="cb" id="alerts"></div>
+          <div class="lnk"><span>Все уведомления</span><span>›</span></div>
+        </div>
+      </div>
+
+      <div class="grid g3b">
+        <div class="card">
+          <div class="ch"><h3>Динамика заявок</h3><div class="chip" style="padding:5px 10px">По дням ▾</div></div>
+          <div class="cb"><div id="legendLine" style="display:flex;gap:16px;font-size:11.5px;margin-bottom:8px"></div><div id="line"></div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Заявки по направлениям</h3></div>
+          <div class="cb" id="dirs"></div>
+          <div class="lnk"><span>Подробнее</span><span>›</span></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Нагрузка сотрудников</h3><div class="chip" style="padding:5px 10px">По заявкам ▾</div></div>
+          <div class="cb" id="workload"></div>
+          <div class="lnk"><span>Все сотрудники</span><span>›</span></div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="ch"><h3>Последние заявки</h3></div>
+          <div class="cb" style="padding:0">
+            <table><thead><tr><th>№</th><th>Клиент</th><th>Тип заявки</th><th>Ответственный</th><th>Статус</th><th>Срок</th></tr></thead><tbody id="recent"></tbody></table>
+          </div>
+          <div class="lnk"><span>Все заявки</span><span>›</span></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Быстрые действия</h3></div>
+          <div class="cb" style="padding:6px 0" id="quick"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const el=id=>document.getElementById(id);
+// ---- KPI ----
+const KPI=[
+ {ic:"💼",c:"#2f6df0",l:"Всего заявок",v:"1 248",t:"↑ 12% к прошлому месяцу",up:1},
+ {ic:"🟢",c:"#22c55e",l:"Новые заявки",v:"198",t:"↑ 18% к прошлому месяцу",up:1},
+ {ic:"🏆",c:"#f59e0b",l:"В работе",v:"432",t:"↑ 5% к прошлому месяцу",up:1},
+ {ic:"📦",c:"#8b5cf6",l:"Закрыто за месяц",v:"786",t:"↑ 15% к прошлому месяцу",up:1},
+ {ic:"⏰",c:"#ef4444",l:"Просроченные",v:"37",t:"↓ 8% к прошлому месяцу",up:0},
+ {ic:"📡",c:"#06b6d4",l:"Активные клиенты",v:"312",t:"↑ 9% к прошлому месяцу",up:1},
+];
+el("kpis").innerHTML=KPI.map(k=>`<div class="kpi"><div class="ic" style="background:${k.c}">${k.ic}</div><div class="l">${k.l}</div><div class="v">${k.v}</div><div class="t ${k.up?'up':'down'}">${k.t}</div></div>`).join("");
+
+// ---- Donut ----
+const SEG=[
+ {nm:"Новые",v:198,pc:"15.9%",c:"#2f6df0"},
+ {nm:"В работе",v:432,pc:"34.6%",c:"#f59e0b"},
+ {nm:"Ожидают клиента",v:156,pc:"12.5%",c:"#8b5cf6"},
+ {nm:"Ожидают поставщика",v:128,pc:"10.3%",c:"#06b6d4"},
+ {nm:"Решено",v:296,pc:"23.7%",c:"#22c55e"},
+ {nm:"Закрыто",v:38,pc:"3.0%",c:"#cbd5e1"},
+];
+(function(){
+  const total=SEG.reduce((s,x)=>s+x.v,0),R=64,C=2*Math.PI*R;let off=0;
+  let circles="";
+  SEG.forEach(s=>{const len=C*s.v/total;circles+=`<circle cx="80" cy="80" r="${R}" fill="none" stroke="${s.c}" stroke-width="22" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 80 80)"></circle>`;off+=len;});
+  el("donut").innerHTML=`<svg width="160" height="160" viewBox="0 0 160 160">${circles}<text x="80" y="76" text-anchor="middle" font-size="22" font-weight="700" fill="#1b2a4a">1 248</text><text x="80" y="95" text-anchor="middle" font-size="11" fill="#7a869a">всего</text></svg>`;
+  el("donutLegend").innerHTML=SEG.map(s=>`<div class="lrow"><span class="dot" style="background:${s.c}"></span><span class="nm">${s.nm}</span><span class="vl">${s.v}</span><span class="pc">${s.pc}</span></div>`).join("");
+})();
+
+// ---- Tasks ----
+const TASKS=[
+ ["Подготовить КП для ТОО «КазТрансЛогистик»","09:30",0],
+ ["Согласовать коммерческое предложение","10:00",0],
+ ["Проверить оплату по заявке #1245 (ТОО Green Road)","11:00",0],
+ ["Связаться с клиентом по заявке #1220","08:30",1],
+ ["Проверить готовность оборудования к отгрузке","Вчера",1],
+ ["Подготовить отчёт по проекту ТОО «Алатау Petrol»","Вчера",1],
+];
+el("tasks").innerHTML=TASKS.map(t=>`<div class="task ${t[2]?'done':''}"><span class="box"></span><span class="nm">${t[0]}</span><span class="tm">${t[1]}</span></div>`).join("");
+
+// ---- Alerts ----
+const AL=[
+ {c:"#ef4444",nm:"Просроченные заявки",sub:"Требуют внимания",big:"37"},
+ {c:"#f59e0b",nm:"Оборудование офлайн",sub:"Проверьте подключение",big:"12"},
+ {c:"#f59e0b",nm:"Истекают лицензии",sub:"В ближайшие 7 дней",big:"5"},
+];
+el("alerts").innerHTML=AL.map(a=>`<div class="al"><span class="d" style="background:${a.c}"></span><div><div class="nm">${a.nm}</div><div class="sub">${a.sub}</div></div><span class="big" style="color:${a.c}">${a.big}</span></div>`).join("");
+
+// ---- Line chart ----
+(function(){
+  const W=560,H=210,pad=30,maxY=100;
+  const xs=["01.05","06.05","11.05","16.05","21.05","26.05","31.05"];
+  const N=16;
+  const newD=[28,32,30,38,42,40,48,52,46,55,60,58,66,70,64,72];
+  const closeD=[18,22,20,26,30,28,34,38,33,40,44,42,50,54,49,58];
+  const totD=newD.map((v,i)=>v+closeD[i]+ (i%3)*4);
+  const series=[["Новые",newD,"#2f6df0"],["Закрытые",closeD,"#22c55e"],["Всего",totD.map(v=>Math.min(v,100)),"#9aa6b8"]];
+  const px=i=>pad+ (W-2*pad)*i/(N-1), py=v=>H-pad-(H-2*pad)*v/maxY;
+  let grid="";for(let g=0;g<=4;g++){const y=pad+(H-2*pad)*g/4;grid+=`<line x1="${pad}" y1="${y}" x2="${W-pad}" y2="${y}" stroke="#eef2f8"></line><text x="6" y="${y+3}" font-size="9" fill="#9aa6b8">${100-g*25}</text>`;}
+  let xlab="";xs.forEach((x,i)=>{xlab+=`<text x="${pad+(W-2*pad)*i/(xs.length-1)}" y="${H-8}" font-size="9" fill="#9aa6b8" text-anchor="middle">${x}</text>`;});
+  let lines=series.map(s=>{const pts=s[1].map((v,i)=>`${px(i)},${py(v)}`).join(" ");return `<polyline points="${pts}" fill="none" stroke="${s[2]}" stroke-width="2"></polyline>`;}).join("");
+  el("line").innerHTML=`<svg width="100%" viewBox="0 0 ${W} ${H}">${grid}${lines}${xlab}</svg>`;
+  el("legendLine").innerHTML=series.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;color:#5a6b8c"><span style="width:18px;height:3px;background:${s[2]};display:inline-block;border-radius:2px"></span>${s[0]}</span>`).join("");
+})();
+
+// ---- Directions ----
+const DIRS=[
+ ["Мониторинг транспорта",34,424],["Контроль топлива (ДУТ)",22,274],["Видеомониторинг",15,187],
+ ["Телематика и датчики",12,150],["Поддержка и консультации",9,113],["Проекты и внедрение",8,100],
+];
+el("dirs").innerHTML=DIRS.map(d=>`<div class="bar"><div class="top2"><span>${d[0]}</span><span style="color:#5a6b8c"><b>${d[1]}%</b> (${d[2]})</span></div><div class="track"><div class="fill" style="width:${d[1]/34*100}%"></div></div></div>`).join("");
+
+// ---- Workload ----
+const WL=[["Айбек Н.",42],["Динара С.",38],["Руслан К.",36],["Мария Л.",31],["Ержан Т.",28]];
+el("workload").innerHTML=WL.map(w=>{const ini=w[0].split(" ").map(s=>s[0]).join("");return `<div class="wl"><span class="av">${ini}</span><span class="nm">${w[0]}</span><span class="track"><span class="fill" style="width:${w[1]/42*100}%"></span></span><span class="vl">${w[1]}</span></div>`;}).join("");
+
+// ---- Recent ----
+const REC=[
+ ["#1250","ТОО «KazTransLogistic»","Мониторинг транспорта","Айбек Н.","В работе","s-work","22.05.2024 14:00"],
+ ["#1249","ТОО «Green Road»","Контроль топлива (ДУТ)","Динара С.","Ожидает клиента","s-wait","21.05.2024 11:00"],
+ ["#1248","ТОО «Алатау Petrol»","Видеомониторинг","Руслан К.","Новая","s-new","22.05.2024 16:00"],
+ ["#1247","ИП «АвтоПарк KZ»","Поддержка и консультации","Мария Л.","В работе","s-work","20.05.2024 09:00"],
+ ["#1246","ТОО «СтройДорКомплект»","Проекты и внедрение","Ержан Т.","Ожидает поставщика","s-sup","23.05.2024 15:00"],
+];
+el("recent").innerHTML=REC.map(r=>`<tr><td class="num">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><span class="pill ${r[5]}">${r[4]}</span></td><td>${r[6]}</td></tr>`).join("");
+
+// ---- Quick actions ----
+const QA=[["➕","#2f6df0","Создать новую заявку"],["👤","#22c55e","Добавить клиента"],["📁","#8b5cf6","Создать проект"],["⬆","#06b6d4","Загрузить документ"],["₸","#f59e0b","Проверить оплату"]];
+el("quick").innerHTML=QA.map(q=>`<div class="qa"><span class="ic" style="background:${q[1]}">${q[0]}</span><span style="color:#2f6df0">${q[2]}</span></div>`).join("");
+</script>
+</body>
+</html>

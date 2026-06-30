@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omnicomm CRM — прототип</title>
+<style>
+  :root{--navy:#1f3864;--navy2:#16294a;--blue:#2e75b6;--blue-l:#5b9bd5;--bg:#f4f6fa;--card:#fff;--line:#e2e8f0;--text:#1e293b;--muted:#64748b;--green:#16a34a;--green-bg:#dcfce7;--red:#dc2626;--red-bg:#fee2e2;--amber:#d97706;--amber-bg:#fef3c7;--blue-bg:#dbeafe;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Segoe UI,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+  .app{display:flex;min-height:100vh}
+  .side{width:230px;background:var(--navy);color:#cbd6e8;display:flex;flex-direction:column;flex-shrink:0}
+  .logo{padding:20px 22px;font-weight:bold;font-size:20px;color:#fff;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo span{color:var(--blue-l)}
+  .nav{padding:12px 0;flex:1}
+  .nav a{display:flex;align-items:center;gap:11px;padding:11px 22px;color:#cbd6e8;text-decoration:none;font-size:14px;cursor:pointer;border-left:3px solid transparent}
+  .nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav a.active{background:var(--navy2);color:#fff;border-left-color:var(--blue-l)}
+  .nav .ic{width:18px;text-align:center;opacity:.9}
+  .side-foot{padding:14px 22px;font-size:12px;color:#8aa0c4;border-top:1px solid rgba(255,255,255,.08)}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .top{background:#fff;border-bottom:1px solid var(--line);padding:14px 26px;display:flex;align-items:center;justify-content:space-between}
+  .top h1{font-size:19px;color:var(--navy)}
+  .top .user{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+  .top select{padding:7px 10px;border:1px solid var(--line);border-radius:7px;font-size:13px;background:#fff;color:var(--text)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
+  .content{padding:24px 26px;overflow:auto}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;border-top:3px solid var(--blue)}
+  .kpi .v{font-size:28px;font-weight:bold;color:var(--navy)}
+  .kpi .l{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .kpi.red{border-top-color:var(--red)} .kpi.red .v{color:var(--red)}
+  .kpi.green{border-top-color:var(--green)} .kpi.green .v{color:var(--green)}
+  .kpi.amber{border-top-color:var(--amber)} .kpi.amber .v{color:var(--amber)}
+  .row{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:18px}
+  .panel h3{padding:13px 18px;font-size:14px;color:var(--navy);border-bottom:1px solid var(--line);background:#fafbfd;display:flex;align-items:center;justify-content:space-between}
+  .panel .body{padding:8px 0}
+  .pad{padding:16px 18px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+  .s-new{background:var(--blue-bg);color:#1e40af}.s-work{background:#e0e7ff;color:#3730a3}.s-wait{background:var(--amber-bg);color:var(--amber)}.s-done{background:var(--green-bg);color:var(--green)}.s-over{background:var(--red-bg);color:var(--red)}.s-plan{background:#cffafe;color:#0e7490}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:12px;color:var(--muted);text-transform:uppercase;padding:10px 18px;border-bottom:1px solid var(--line);background:#fafbfd}
+  td{padding:11px 18px;border-bottom:1px solid #f1f5f9}
+  tbody tr{cursor:pointer}tbody tr:hover{background:#f8fafc}
+  .num{font-weight:600;color:var(--blue)}
+  .statusline{display:flex;align-items:center;gap:9px;padding:9px 18px;border-bottom:1px solid #f1f5f9;font-size:13px}
+  .statusline .cnt{margin-left:auto;font-weight:bold;color:var(--navy)}
+  .alert{display:flex;gap:9px;padding:10px 18px;border-bottom:1px solid #f1f5f9;font-size:13px;align-items:flex-start}
+  .alert .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+  .feed{padding:9px 18px;border-bottom:1px solid #f1f5f9;font-size:13px}
+  .feed .t{color:var(--muted);font-size:11.5px}
+  .filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .filters select,.filters input{padding:8px 11px;border:1px solid var(--line);border-radius:7px;font-size:13px;background:#fff}
+  .hidden{display:none}
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:12px;width:760px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal-h{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .modal-h .x{margin-left:auto;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+  .modal-b{padding:20px 22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 26px;margin-bottom:18px}
+  .field .k{font-size:11.5px;color:var(--muted);text-transform:uppercase}
+  .field .val{font-size:14px;margin-top:2px}
+  .sec{font-size:13px;font-weight:bold;color:var(--navy);margin:16px 0 9px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .timeline{list-style:none}
+  .timeline li{position:relative;padding:0 0 13px 20px;border-left:2px solid var(--line);margin-left:4px}
+  .timeline li:before{content:'';position:absolute;left:-6px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+  .timeline .a{font-size:13px;font-weight:600}.timeline .m{font-size:12px;color:var(--muted)}
+  .photos{display:flex;gap:10px;flex-wrap:wrap}
+  .photo{width:90px;height:70px;border-radius:7px;background:#eef2f7;border:1px dashed #c3cfe0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9aa8bd;font-size:11px;text-align:center}
+  .btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
+  .btn{padding:8px 14px;border-radius:7px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:13px;cursor:pointer}
+  .btn.o{background:#fff;color:var(--blue)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .note{background:#fff8e6;border:1px solid #fde68a;color:#92660b;padding:9px 12px;border-radius:7px;font-size:12.5px;margin-top:10px}
+  .cards3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .rcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+  .rcard h4{color:var(--navy);font-size:14px;margin-bottom:10px}
+  .rcard .line{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #f4f6fa}
+  .rcard .line.off{opacity:.4}
+  .toggle{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+  .sw{width:40px;height:22px;border-radius:20px;background:var(--green);position:relative;flex-shrink:0;cursor:pointer;transition:background .15s}
+  .sw.off{background:#cbd5e1}
+  .sw:after{content:'';position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:all .15s}
+  .sw.off:after{right:auto;left:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{background:#eef2f7;border:1px solid var(--line);border-radius:16px;padding:4px 11px;font-size:12px;color:#334155}
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:12px 18px;border-radius:9px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(10px);transition:all .25s;z-index:99}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .banner{background:#fff3f3;border:1px solid #fecaca;color:#b91c1c;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:flex;gap:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo">OMNI<span>COMM</span></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">Прототип · живые настройки<br>состояние сохраняется</div>
+  </aside>
+  <div class="main">
+    <div class="top">
+      <h1 id="title">Рабочий стол</h1>
+      <div class="user">
+        <span>Текущая роль:</span>
+        <select id="roleSel" onchange="changeRole(this.value)"></select>
+        <div class="avatar" id="avatar">А</div>
+      </div>
+    </div>
+    <div class="content">
+      <div id="view-dash"><div class="kpis" id="kpis"></div>
+        <div class="row"><div class="panel"><h3>Заявки по статусам</h3><div class="body" id="byStatus"></div></div><div class="panel"><h3>Срочные уведомления</h3><div class="body" id="alerts"></div></div></div>
+        <div class="row"><div class="panel"><h3>Последние заявки</h3><div class="body"><table><thead><tr><th>№</th><th>Клиент</th><th>Тип</th><th>Статус</th></tr></thead><tbody id="recentReqs"></tbody></table></div></div><div class="panel"><h3>Последние действия</h3><div class="body" id="feed"></div></div></div>
+      </div>
+      <div id="view-reqs" class="hidden">
+        <div class="filters"><input id="fq" placeholder="Поиск: № или клиент…" oninput="renderReqs()"><select id="fstatus" onchange="renderReqs()"><option value="">Все статусы</option></select><select id="ftype" onchange="renderReqs()"><option value="">Все типы</option></select></div>
+        <div class="panel"><table><thead><tr><th>№</th><th>Клиент</th><th>Объект</th><th>Тип</th><th>Приоритет</th><th>Монтажник</th><th>Статус</th></tr></thead><tbody id="reqRows"></tbody></table></div>
+      </div>
+      <div id="view-clients" class="hidden"><div class="panel"><h3>Клиенты</h3><table><thead><tr><th>Наименование</th><th>БИН/ИИН</th><th>Телефон</th><th>Активные заявки</th><th>Абонплата</th><th>Менеджер</th></tr></thead><tbody id="clientRows"></tbody></table></div></div>
+      <div id="view-objects" class="hidden"><div class="panel"><h3>Объекты</h3><table><thead><tr><th>Объект</th><th>Клиент</th><th>Адрес</th><th>Оборудование</th><th>Координаты</th><th>Заявки</th></tr></thead><tbody id="objectRows"></tbody></table></div></div>
+      <div id="view-inst" class="hidden"><div class="panel"><h3>Отчёт по монтажным специалистам</h3><table><thead><tr><th>Специалист</th><th>Статус</th><th>Назначено</th><th>Выполнено</th><th>Просрочено</th><th>Ср. прибытие</th><th>Ср. работы</th><th>Без фото</th></tr></thead><tbody id="instRows"></tbody></table></div></div>
+      <div id="view-cal" class="hidden"><div class="panel"><h3>Календарь выездов — сегодня</h3><table><thead><tr><th>Время</th><th>Монтажник</th><th>Клиент</th><th>Объект</th><th>Тип работ</th><th>Статус выезда</th></tr></thead><tbody id="calRows"></tbody></table></div></div>
+      <div id="view-bills" class="hidden"><div id="billBanner"></div><div class="kpis" id="billKpis"></div><div class="panel"><h3>Счета по абонентской плате <span id="bill1c"></span></h3><table><thead><tr><th>Клиент</th><th>Период</th><th>Сумма</th><th>Оплачено</th><th>Плановая дата</th><th>Статус</th></tr></thead><tbody id="billRows"></tbody></table></div></div>
+      <div id="view-reports" class="hidden"><div class="btns" id="reportBtns" style="margin-bottom:16px"></div><div class="cards3" id="reportCards"></div></div>
+      <div id="view-settings" class="hidden">
+        <div class="row">
+          <div class="panel"><h3>Роли и доступ</h3><div class="pad" id="setRoles"></div></div>
+          <div class="panel"><h3>Интеграции</h3><div class="pad" id="setIntegrations"></div></div>
+        </div>
+        <div class="panel"><h3>Справочники</h3><div class="pad"><div class="sec" style="margin-top:0">Типы заявок (16)</div><div class="chips" id="setTypes"></div><div class="sec">Статусы заявок (14)</div><div class="chips" id="setStatuses"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="overlay" onclick="if(event.target===this)close_()"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STATUS_CLASS={"Новая":"s-new","Назначена":"s-new","В работе":"s-work","Запланирован выезд":"s-plan","Монтажник выехал":"s-plan","Монтажник на объекте":"s-plan","Работы выполняются":"s-work","Ожидает клиента":"s-wait","Ожидает оборудование":"s-wait","Выполнена":"s-done","На проверке":"s-work","Закрыта":"s-done","Просрочена":"s-over","Отменена":"s-over"};
+const TYPES=["Подключение оборудования","Демонтаж оборудования","Замена оборудования","Диагностика оборудования","Неисправность GPS-оборудования","Неисправность датчика топлива","Неисправность видеонаблюдения","Настройка мониторинга","Консультация клиента","Обучение клиента","Интеграция","Power BI / отчётность","Коммерческий запрос","Вопрос по оплате","Вопрос по документам","Прочее"];
+const STATUSES=["Новая","Назначена","В работе","Запланирован выезд","Монтажник выехал","Монтажник на объекте","Работы выполняются","Ожидает клиента","Ожидает оборудование","Выполнена","На проверке","Закрыта","Просрочена","Отменена"];
+const PHOTO_REQ=["Подключение оборудования","Демонтаж оборудования","Замена оборудования","Диагностика оборудования","Неисправность GPS-оборудования","Неисправность датчика топлива","Неисправность видеонаблюдения","Настройка мониторинга"];
+
+// ----- РОЛИ И ДОСТУП (RBAC) -----
+const ROLES=[["management","Руководство"],["head","Руководитель направления"],["manager","Менеджер"],["support","Техподдержка"],["installer","Монтажник"],["accounting","Бухгалтерия"],["admin","Администратор"]];
+const ROLE_LABEL=Object.fromEntries(ROLES);
+// какие разделы доступны каждой роли
+const ACCESS={
+  dash:["management","head","manager","support","installer","accounting","admin"],
+  reqs:["management","head","manager","support","installer","admin"],
+  clients:["management","head","manager","support","accounting","admin"],
+  objects:["management","head","manager","support","admin"],
+  inst:["management","head","admin"],
+  cal:["management","head","manager","support","installer","admin"],
+  bills:["management","manager","accounting","admin"],
+  reports:["management","head","manager","accounting","admin"],
+  settings:["admin"],
+};
+const NAVDEF=[["dash","▦","Рабочий стол"],["reqs","▤","Заявки"],["clients","◍","Клиенты"],["objects","⌖","Объекты"],["inst","⛑","Монтажники"],["cal","▣","Календарь выездов"],["bills","₸","Счета и оплаты"],["reports","▥","Отчёты"],["settings","⚙","Настройки"]];
+
+// ----- ДЕМО-ДАННЫЕ -----
+const REQS=[
+  {num:"Z-2026001",client:"ТОО «АвтоПарк KZ»",object:"Гараж №1, Алматы",type:"Подключение оборудования",prio:"Высокий",inst:"Петров П.П.",status:"Запланирован выезд",src:"telephony",due:"сегодня 16:00",hist:[["Создана","из звонка · Жаркова А.А.","26.06 09:12"],["Запланирован выезд","Петров П.П. на 16:00","26.06 10:05"]],photos:["до начала работ"]},
+  {num:"Z-2026002",client:"ТОО «АвтоПарк KZ»",object:"Гараж №1, Алматы",type:"Неисправность GPS-оборудования",prio:"Критичный",inst:"Петров П.П.",status:"Монтажник на объекте",src:"whatsapp",due:"сегодня 12:30",hist:[["Создана","WhatsApp · бот","26.06 08:01"],["Монтажник на объекте","геометка @43.27,76.92","26.06 09:35"]],photos:["неисправность"]},
+  {num:"Z-2026003",client:"ИП Логистика",object:"Склад, Астана",type:"Диагностика оборудования",prio:"Обычный",inst:"—",status:"Новая",src:"site",due:"завтра 18:00",hist:[["Создана","форма на сайте","26.06 10:48"]],photos:[]},
+  {num:"Z-2026004",client:"ИП Логистика",object:"Склад, Астана",type:"Консультация клиента",prio:"Обычный",inst:"—",status:"В работе",src:"email",due:"28.06",hist:[["Создана","email","25.06 14:20"]],photos:[]},
+  {num:"Z-2026005",client:"ТОО «АвтоПарк KZ»",object:"Гараж №1, Алматы",type:"Замена оборудования",prio:"Высокий",inst:"Петров П.П.",status:"Просрочена",src:"telephony",due:"25.06 17:00 (просрочено)",hist:[["Создана","телефон","24.06 11:00"],["Просрочена","нарушен срок","25.06 17:01"]],photos:[]},
+  {num:"Z-2026006",client:"ИП Логистика",object:"Склад, Астана",type:"Настройка мониторинга",prio:"Обычный",inst:"Петров П.П.",status:"Выполнена",src:"telegram",due:"26.06",hist:[["Создана","Telegram","26.06 08:00"],["Выполнена","фотоотчёт приложен","26.06 11:15"]],photos:["до начала работ","установленное оборудование","результат работ"]},
+];
+const CLIENTS=[{name:"ТОО «АвтоПарк KZ»",bin:"123456789012",phone:"+77011112233",active:3,bill:"45 000 ₸/мес",mgr:"Жаркова А.А."},{name:"ИП Логистика",bin:"987654321098",phone:"+77017778899",active:2,bill:"30 000 ₸/мес",mgr:"Жаркова А.А."},{name:"ТОО «ТрансСервис»",bin:"445566778899",phone:"+77012223344",active:0,bill:"—",mgr:"Жаркова А.А."}];
+const OBJECTS=[{name:"Гараж №1",client:"ТОО «АвтоПарк KZ»",addr:"г. Алматы, ул. Райымбека 100",eq:"GPS, датчик топлива",geo:"43.27, 76.92",reqs:4},{name:"Склад",client:"ИП Логистика",addr:"г. Астана, пр. Кабанбай 50",eq:"Видеонаблюдение",geo:"51.13, 71.43",reqs:2},{name:"Автобаза",client:"ТОО «ТрансСервис»",addr:"г. Шымкент, ул. Толе би 5",eq:"GPS x12",geo:"42.32, 69.59",reqs:0}];
+const INSTALLERS=[{name:"Петров П.П.",status:"на объекте",assigned:4,done:1,over:1,arr:"30 мин",work:"90 мин",noPhoto:0},{name:"Сидоров С.С.",status:"свободен",assigned:2,done:2,over:0,arr:"25 мин",work:"60 мин",noPhoto:1}];
+const VISITS=[{time:"09:00–11:15",inst:"Петров П.П.",client:"ИП Логистика",obj:"Склад, Астана",type:"Настройка мониторинга",status:"завершил работы",cls:"s-done"},{time:"12:00",inst:"Петров П.П.",client:"ТОО «АвтоПарк KZ»",obj:"Гараж №1, Алматы",type:"Неисправность GPS",status:"на объекте",cls:"s-plan"},{time:"16:00",inst:"Петров П.П.",client:"ТОО «АвтоПарк KZ»",obj:"Гараж №1, Алматы",type:"Подключение оборудования",status:"назначен",cls:"s-new"}];
+const INVOICES=[{client:"ТОО «АвтоПарк KZ»",period:"Июнь 2026",amount:"45 000 ₸",paid:"45 000 ₸",plan:"01.06",status:"Оплачено",cls:"s-done"},{client:"ИП Логистика",period:"Июнь 2026",amount:"30 000 ₸",paid:"0 ₸",plan:"01.06",status:"Счёт выставлен",cls:"s-wait"},{client:"ТОО «АвтоПарк KZ»",period:"Май 2026",amount:"45 000 ₸",paid:"0 ₸",plan:"01.05",status:"Просрочено",cls:"s-over"}];
+const CHANNELS=[["telephony","Телефон"],["whatsapp","WhatsApp"],["telegram","Telegram"],["email","Email"],["site","Сайт"]];
+const INTEGRATIONS=[["telephony","IP-телефония"],["whatsapp","WhatsApp Business API"],["telegram","Telegram Bot"],["email","Корпоративная почта"],["site","Форма заявки на сайте"],["onec","1С"],["powerbi","Power BI"]];
+
+// ----- НАСТРОЙКИ (сохраняются) -----
+const DEFAULTS={integrations:{telephony:1,whatsapp:1,telegram:1,email:1,site:1,onec:0,powerbi:1},roles:{management:1,head:1,manager:1,support:1,installer:1,accounting:1,admin:1},currentRole:"admin"};
+let SETTINGS=load();
+function load(){try{const s=JSON.parse(localStorage.getItem("omnicomm_settings"));if(s&&s.integrations&&s.roles)return s;}catch(e){}return JSON.parse(JSON.stringify(DEFAULTS));}
+function save(){localStorage.setItem("omnicomm_settings",JSON.stringify(SETTINGS));}
+
+const el=id=>document.getElementById(id);
+let toastT;
+function toast(msg){const t=el("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2200);}
+function badge(s){return `<span class="pill ${STATUS_CLASS[s]||'s-new'}">${s}</span>`}
+const STEPS=[["Принял","Назначена"],["Выехал","Монтажник выехал"],["Прибыл","Монтажник на объекте"],["Начал работы","Работы выполняются"],["Завершил","Выполнена"]];
+const REACHED={"Назначена":0,"Запланирован выезд":0,"Монтажник выехал":1,"Монтажник на объекте":2,"Работы выполняются":3,"Выполнена":4,"Закрыта":4};
+function stepsHtml(status){const idx=REACHED[status];const done=idx===undefined?-1:idx;return '<div class="photos">'+STEPS.map((s,i)=>{const ok=i<=done;return `<div class="photo" style="background:${ok?'var(--green-bg)':'#eef2f7'};border-color:${ok?'var(--green)':'#c3cfe0'};color:${ok?'var(--green)':'#9aa8bd'}">${ok?'✓':'○'}<br>${s[0]}</div>`;}).join("")+'</div>';}
+
+// ----- РЕНДЕР НАВИГАЦИИ И РОЛЕЙ -----
+let CURRENT="dash";
+function enabledRoles(){return ROLES.filter(([c])=>SETTINGS.roles[c]).map(([c])=>c);}
+function renderRoleSelect(){
+  const allowed=enabledRoles();
+  if(!allowed.includes(SETTINGS.currentRole))SETTINGS.currentRole=allowed[0]||"admin";
+  el("roleSel").innerHTML=allowed.map(c=>`<option value="${c}" ${c===SETTINGS.currentRole?"selected":""}>${ROLE_LABEL[c]}</option>`).join("");
+  el("avatar").textContent=(ROLE_LABEL[SETTINGS.currentRole]||"?")[0];
+}
+function renderNav(){
+  const role=SETTINGS.currentRole;
+  const items=NAVDEF.filter(([v])=>ACCESS[v].includes(role));
+  el("nav").innerHTML=items.map(([v,ic,label])=>`<a data-v="${v}" class="${v===CURRENT?"active":""}" onclick="go('${v}')"><span class="ic">${ic}</span> ${label}</a>`).join("");
+  if(!items.find(([v])=>v===CURRENT))go(items[0][0]);
+}
+const RENDER={dash:renderDash,reqs:renderReqs,clients:renderClients,objects:renderObjects,inst:renderInst,cal:renderCal,bills:renderBills,reports:renderReports,settings:renderSettings};
+const VIEWS=Object.keys(RENDER);
+function go(v){
+  CURRENT=v;
+  VIEWS.forEach(x=>el("view-"+x).classList.toggle("hidden",x!==v));
+  document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("active",a.dataset.v===v));
+  const def=NAVDEF.find(d=>d[0]===v);el("title").textContent=def?def[2]:"";
+  if(RENDER[v])RENDER[v]();
+}
+function changeRole(r){SETTINGS.currentRole=r;save();renderRoleSelect();renderNav();toast("Роль: "+ROLE_LABEL[r]);}
+
+// ----- РЕНДЕРЫ РАЗДЕЛОВ -----
+function renderDash(){
+  const c=s=>REQS.filter(r=>r.status===s).length;
+  const kpis=[{v:REQS.length,l:"Всего заявок"},{v:c("Новая"),l:"Новые"},{v:REQS.filter(r=>["В работе","Работы выполняются"].includes(r.status)).length,l:"В работе"},{v:c("Просрочена"),l:"Просрочено",cls:"red"},{v:c("Выполнена"),l:"Выполнено",cls:"green"},{v:REQS.filter(r=>r.inst==="—").length,l:"Без монтажника",cls:"amber"}];
+  el("kpis").innerHTML=kpis.map(k=>`<div class="kpi ${k.cls||''}"><div class="v">${k.v}</div><div class="l">${k.l}</div></div>`).join("");
+  const map={};REQS.forEach(r=>map[r.status]=(map[r.status]||0)+1);
+  el("byStatus").innerHTML=Object.entries(map).map(([s,n])=>`<div class="statusline">${badge(s)}<span class="cnt">${n}</span></div>`).join("");
+  const al=[{c:"var(--red)",t:"Z-2026005 просрочена — нарушен срок"},{c:"var(--amber)",t:"Z-2026003 без назначенного монтажника"},{c:"var(--red)",t:"Z-2026002 (критичная) на объекте"},{c:"var(--amber)",t:"Z-2026001 ожидает фотоотчёт"}];
+  el("alerts").innerHTML=al.map(a=>`<div class="alert"><div class="dot" style="background:${a.c}"></div>${a.t}</div>`).join("");
+  el("recentReqs").innerHTML=REQS.slice(0,5).map(r=>`<tr onclick="openCard(${REQS.indexOf(r)})"><td class="num">${r.num}</td><td>${r.client}</td><td>${r.type}</td><td>${badge(r.status)}</td></tr>`).join("");
+  const feed=[["Z-2026002 → Монтажник на объекте","09:35"],["Z-2026001 → Запланирован выезд","10:05"],["Z-2026003 создана (сайт)","10:48"],["Z-2026006 → Выполнена","11:15"]];
+  el("feed").innerHTML=feed.map(f=>`<div class="feed">${f[0]}<div class="t">${f[1]}</div></div>`).join("");
+}
+function visibleReqs(){return REQS.filter(r=>!r.src||SETTINGS.integrations[r.src]);}
+function renderReqs(){
+  const q=(el("fq").value||"").toLowerCase(),fs=el("fstatus").value,ft=el("ftype").value;
+  const rows=visibleReqs().filter(r=>(!q||r.num.toLowerCase().includes(q)||r.client.toLowerCase().includes(q))&&(!fs||r.status===fs)&&(!ft||r.type===ft));
+  el("reqRows").innerHTML=rows.map(r=>`<tr onclick="openCard(${REQS.indexOf(r)})"><td class="num">${r.num}</td><td>${r.client}</td><td>${r.object}</td><td>${r.type}</td><td>${r.prio}</td><td>${r.inst}</td><td>${badge(r.status)}</td></tr>`).join("")||`<tr><td colspan="7" style="color:var(--muted);padding:22px 18px">Нет заявок по активным каналам</td></tr>`;
+}
+function renderClients(){el("clientRows").innerHTML=CLIENTS.map(c=>`<tr><td><b>${c.name}</b></td><td>${c.bin}</td><td>${c.phone}</td><td>${c.active}</td><td>${c.bill}</td><td>${c.mgr}</td></tr>`).join("");}
+function renderObjects(){el("objectRows").innerHTML=OBJECTS.map(o=>`<tr><td><b>${o.name}</b></td><td>${o.client}</td><td>${o.addr}</td><td>${o.eq}</td><td>${o.geo}</td><td>${o.reqs}</td></tr>`).join("");}
+function renderInst(){el("instRows").innerHTML=INSTALLERS.map(i=>`<tr><td><b>${i.name}</b></td><td>${i.status}</td><td>${i.assigned}</td><td style="color:var(--green)">${i.done}</td><td style="color:${i.over?'var(--red)':'inherit'}">${i.over}</td><td>${i.arr}</td><td>${i.work}</td><td style="color:${i.noPhoto?'var(--amber)':'inherit'}">${i.noPhoto}</td></tr>`).join("");}
+function renderCal(){el("calRows").innerHTML=VISITS.map(v=>`<tr><td><b>${v.time}</b></td><td>${v.inst}</td><td>${v.client}</td><td>${v.obj}</td><td>${v.type}</td><td><span class="pill ${v.cls}">${v.status}</span></td></tr>`).join("");}
+function renderBills(){
+  const k=[{v:"120 000 ₸",l:"Начислено"},{v:"75 000 ₸",l:"Выставлено"},{v:"45 000 ₸",l:"Оплачено",cls:"green"},{v:"45 000 ₸",l:"Просрочено",cls:"red"},{v:"2",l:"Клиентов с абонплатой"},{v:"1",l:"С просрочкой",cls:"amber"}];
+  el("billKpis").innerHTML=k.map(x=>`<div class="kpi ${x.cls||''}"><div class="v">${x.v}</div><div class="l">${x.l}</div></div>`).join("");
+  el("billRows").innerHTML=INVOICES.map(i=>`<tr><td><b>${i.client}</b></td><td>${i.period}</td><td>${i.amount}</td><td>${i.paid}</td><td>${i.plan}</td><td><span class="pill ${i.cls}">${i.status}</span></td></tr>`).join("");
+  // эффект интеграции 1С
+  if(SETTINGS.integrations.onec){
+    el("bill1c").innerHTML=`<button class="btn" style="padding:5px 11px;font-size:12px" onclick="toast('Синхронизация с 1С выполнена')">Синхронизация с 1С</button>`;
+    el("billBanner").innerHTML="";
+  }else{
+    el("bill1c").innerHTML="";
+    el("billBanner").innerHTML=`<div class="banner">⚠ Интеграция с 1С отключена в настройках — обмен счетами и оплатами недоступен.</div>`;
+  }
+}
+function renderReports(){
+  const counts={telephony:2,whatsapp:1,telegram:1,email:1,site:1};
+  const chLines=CHANNELS.map(([k,label])=>{const on=SETTINGS.integrations[k];return `<div class="line ${on?'':'off'}"><span style="color:var(--muted)">${label}</span><b>${on?counts[k]:"откл."}</b></div>`;}).join("");
+  const cards=[
+    {h:"Общий отчёт по заявкам",rows:[["Всего",6],["Выполнено",1],["Просрочено",1],["Ср. реакция","42 мин"]]},
+    {h:"По монтажникам",rows:[["Активных",2],["Ср. прибытие","28 мин"],["Повторные",0],["Без фото",1]]},
+    {h:"По клиентам",rows:[["Клиентов",3],["С обращениями",2],["Проблемные",0],["Частота","2.5/мес"]]},
+    {h:"По каналам связи",html:chLines},
+    {h:"По сотрудникам",rows:[["В работе",3],["Выполнено",4],["Просрочено",1],["Загрузка","78%"]]},
+    {h:"По абонплате",rows:[["Начислено","120 000 ₸"],["Оплачено","45 000 ₸"],["Просрочено","45 000 ₸"],["Клиентов",2]]},
+  ];
+  el("reportCards").innerHTML=cards.map(c=>`<div class="rcard"><h4>${c.h}</h4>${c.html||c.rows.map(r=>`<div class="line"><span style="color:var(--muted)">${r[0]}</span><b>${r[1]}</b></div>`).join("")}</div>`).join("");
+  // эффект Power BI
+  el("reportBtns").innerHTML=SETTINGS.integrations.powerbi?`<button class="btn" onclick="toast('Выгрузка в Power BI сформирована')">Выгрузить в Power BI</button><button class="btn o" onclick="toast('Экспорт в Excel готов')">Экспорт в Excel</button>`:`<div class="banner" style="margin:0">⚠ Power BI отключён — выгрузка для дашбордов руководства недоступна.</div>`;
+}
+function renderSettings(){
+  el("setRoles").innerHTML=ROLES.map(([c,label])=>`<div class="toggle"><div><b>${label}</b><div style="color:var(--muted);font-size:12px">доступ к разделам по матрице прав</div></div><div class="sw ${SETTINGS.roles[c]?'':'off'}" onclick="toggleRole('${c}')"></div></div>`).join("");
+  el("setIntegrations").innerHTML=INTEGRATIONS.map(([k,label])=>`<div class="toggle"><span>${label}</span><div class="sw ${SETTINGS.integrations[k]?'':'off'}" onclick="toggleIntegration('${k}')"></div></div>`).join("");
+  el("setTypes").innerHTML=TYPES.map(t=>`<span class="chip">${t}</span>`).join("");
+  el("setStatuses").innerHTML=STATUSES.map(s=>`<span class="chip">${s}</span>`).join("");
+}
+function toggleIntegration(k){
+  SETTINGS.integrations[k]=SETTINGS.integrations[k]?0:1;save();
+  renderSettings();
+  const label=INTEGRATIONS.find(i=>i[0]===k)[1];
+  toast(label+": "+(SETTINGS.integrations[k]?"включено":"выключено"));
+}
+function toggleRole(c){
+  if(c==="admin"){toast("Роль «Администратор» нельзя отключить");return;}
+  SETTINGS.roles[c]=SETTINGS.roles[c]?0:1;save();
+  renderSettings();renderRoleSelect();
+  toast(ROLE_LABEL[c]+": "+(SETTINGS.roles[c]?"роль включена":"роль отключена"));
+}
+
+function openCard(i){
+  const r=REQS[i];const needPhoto=PHOTO_REQ.includes(r.type);const hasResultPhoto=r.photos.some(p=>p.includes("результат"));
+  el("modal").innerHTML=`<div class="modal-h"><div><div style="font-size:12px;color:var(--muted)">Заявка</div><div style="font-size:18px;font-weight:bold;color:var(--navy)">${r.num} · ${badge(r.status)}</div></div><div class="x" onclick="close_()">×</div></div><div class="modal-b"><div class="grid2"><div class="field"><div class="k">Клиент</div><div class="val">${r.client}</div></div><div class="field"><div class="k">Объект</div><div class="val">${r.object}</div></div><div class="field"><div class="k">Тип заявки</div><div class="val">${r.type}</div></div><div class="field"><div class="k">Приоритет</div><div class="val">${r.prio}</div></div><div class="field"><div class="k">Монтажник</div><div class="val">${r.inst}</div></div><div class="field"><div class="k">Срок</div><div class="val">${r.due}</div></div></div><div class="sec">Этапы выезда (с геолокацией)</div>${stepsHtml(r.status)}<div class="sec">Фотоотчёт ${needPhoto?'<span style="color:var(--red);font-weight:normal;font-size:11px">· обязателен</span>':''}</div><div class="photos">${r.photos.map(p=>`<div class="photo">📷<br>${p}</div>`).join("")||'<div style="color:var(--muted);font-size:13px">Фото пока не загружены</div>'}</div>${needPhoto&&!hasResultPhoto?'<div class="note">⚠ Нельзя перевести в «Выполнена» без фото результата (правило ТЗ, раздел 20).</div>':''}<div class="sec">История действий</div><ul class="timeline">${r.hist.map(h=>`<li><div class="a">${h[0]}</div><div class="m">${h[1]} · ${h[2]}</div></li>`).join("")}</ul></div>`;
+  el("overlay").classList.add("show");
+}
+function close_(){el("overlay").classList.remove("show")}
+
+TYPES.forEach(t=>el("ftype").insertAdjacentHTML("beforeend",`<option>${t}</option>`));
+STATUSES.forEach(s=>el("fstatus").insertAdjacentHTML("beforeend",`<option>${s}</option>`));
+renderRoleSelect();renderNav();go("dash");
+</script>
+</body>
+</html>

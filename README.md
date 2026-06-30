@@ -2,57 +2,58 @@
 
 [![Build](https://img.shields.io/github/actions/workflow/status/m34959203/CRM-Omnicomm/ci.yml?branch=main)](https://github.com/m34959203/CRM-Omnicomm/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Stack](https://img.shields.io/badge/stack-Next.js%2016%20·%20Postgres-black)]()
+[![Stack](https://img.shields.io/badge/stack-Node%20·%20Express%20·%20SQLite%20→%20PostgreSQL-black)]()
 
-> CRM для управления клиентами, договорами и автопарком на телематике Omnicomm.
+> CRM мониторинга транспорта Omnicomm Alliance KZ: клиенты, объекты, заявки, контроль монтажников, биллинг.
 
-## Проблема
+## Демо
 
-Данные по клиентам автопарка живут в таблицах и переписке, а телеметрия ТС — отдельно в Omnicomm. Менеджер не видит в одном окне, какие машины закреплены за клиентом, что с договором и оплатой, и как ведёт себя парк по факту. Сверка ручная и медленная.
+- **Live (квази-эфемерный URL):** см. `/home/ubuntu/logs/crm-omnicomm.url` на сервере
+- **Постоянный домен:** `crm-omnicomm.technokod.kz` — после добавления Public Hostname в Cloudflare (см. [deploy/DEPLOY.md](deploy/DEPLOY.md))
+- Демо-доступ (пароль `demo1234`): `admin@` / `manager@` / `support@` / `installer@` / `boss@omnicomm.kz`
+
+## Состав
+
+```
+crm-backend/            Рабочий backend (Node.js + Express + SQLite), 30 эндпоинтов, 28 smoke-тестов
+liftplatform-omnicomm/  Пакет адаптации на базе LiftPlatform (Next.js + PostgreSQL): 13 миграций, 18 API-роутов, UI, интеграции
+ui/                     HTML-прототипы: index (лендинг), dashboard (макет заказчика), prototype (кликабельный), roadmap
+docs/                   Анализ потребности, техпроект, gap-анализы, рабочий документ разработки, TZ-COVERAGE
+deploy/                 run.sh (cron+flock-раннер) + DEPLOY.md (поддомен technokod.kz)
+```
 
 ## Решение
 
-Единое окно: клиенты → договоры → закреплённые ТС, синхронизированные из Omnicomm. CRM подтягивает дерево ТС и агрегаты телеметрии, связывает их с карточкой клиента и контролирует жизненный цикл сделки от лида до продления.
+Единое окно для сервисной компании Omnicomm: клиенты → объекты с оборудованием (GPS/датчики) → заявки и выезды монтажников с геолокацией и фотоотчётами → сквозной поток **продажа → заказ-наряд → Акт ТО → запуск биллинга → счета абонплаты**. Бизнес-правила из ТЗ зашиты (нет результата → нельзя закрыть; монтаж без фото → нельзя «Выполнена»).
 
-## Архитектура
+Два пути реализации:
+- **crm-backend** — самодостаточный рабочий MVP на свободном ПО (запускается сразу, SQLite→PostgreSQL).
+- **liftplatform-omnicomm** — продакшн-путь: форк LiftPlatform (тот же стек, почти идентичный домен) + миграции/роуты, которых в нём нет (этапы выезда, телефония, абонплата). См. [docs/TZ-COVERAGE.md](liftplatform-omnicomm/docs/TZ-COVERAGE.md).
 
-Три коробки + стрелки:
-
-- **Web (Next.js)** — карточки клиентов, договоров, ТС; дашборд менеджера.
-- **API (REST)** — бизнес-логика CRM + синк-воркер к Omnicomm API.
-- **Postgres** — клиенты, договоры, привязки ТС, кэш-снапшоты телеметрии.
-
-Интеграция с Omnicomm — через её HTTP API (отчёты `POST`, топливо в децилитрах ÷10, дерево ТС флэттится). Подробнее: [docs/architecture.md](docs/architecture.md).
-
-## Quick Start
+## Quick Start (рабочий backend)
 
 ```bash
-git clone https://github.com/m34959203/CRM-Omnicomm.git
-cd CRM-Omnicomm
-cp .env.example .env
-# заполни ключи в .env
+cd crm-backend
 npm install
-npm run dev
+npm run seed     # демо-данные
+npm start        # API + UI на http://localhost:3000  (на сервере PORT=3026)
+npm run smoke    # 28 проверок: продажа → наряд → Акт ТО → биллинг
 ```
 
-Открой http://localhost:3000. Подробная инструкция и troubleshooting: [docs/setup.md](docs/setup.md).
+UI: открой корень `/` (лендинг) → дашборд / кликабельный прототип / роадмап.
 
 ## Стек
 
-- **Frontend:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4
-- **Backend:** Postgres 16 · Prisma / raw pg · REST
-- **Интеграция:** Omnicomm HTTP API (синк дерева ТС + агрегаты телеметрии)
-- **Хостинг:** VPS / Docker
+- **Backend:** Node.js + Express, SQLite (better-sqlite3) → PostgreSQL в проде
+- **Auth:** JWT + bcrypt, 7 ролей из ТЗ
+- **Загрузка фото:** multer (локально → MinIO/S3 в проде)
+- **Прод-путь:** Next.js 16 + PostgreSQL (liftplatform-omnicomm)
+- **Хостинг:** VPS + Cloudflare Tunnel (поддомен technokod.kz)
 
-## Roadmap
+## Деплой
 
-- [ ] Скелет CRM — клиенты, договоры, аутентификация (RBAC)
-- [ ] Синк дерева ТС из Omnicomm + привязка к клиенту
-- [ ] Кэш-снапшот агрегатов телеметрии в карточке клиента
-- [ ] Воронка сделок: лид → договор → продление
-- [ ] Уведомления об истечении договоров
-
-Подробно: [docs/roadmap.md](docs/roadmap.md).
+Раннер `deploy/run.sh` под `cron + flock` держит API+UI на `:3026` и публичный CF-туннель.
+Поддомен `crm-omnicomm.technokod.kz` — один шаг в дашборде Cloudflare: [deploy/DEPLOY.md](deploy/DEPLOY.md).
 
 ## Лицензия
 
