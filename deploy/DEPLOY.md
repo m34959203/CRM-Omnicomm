@@ -12,22 +12,35 @@
 flock -n /tmp/crm_omnicomm.lock /home/ubuntu/CRM-Omnicomm/deploy/run.sh
 ```
 
-## Постоянный поддомен `crm-omnicomm.technokod.kz`
+## Постоянный поддомен `crm-omnicomm.technokod.kz` — ПОДНЯТ ✅
 
-Туннели technokod — токен-управляемые (ingress настраивается в дашборде Cloudflare),
-CF API-токена в окружении нет, поэтому DNS+маршрут добавляется один раз вручную.
+Выделенный именованный host-run туннель (изоляция проекта), `cloudflared` бинарём на хосте.
 
-**Важно:** docker-туннель `technokod-server` НЕ достаёт до host-`localhost`
-(docker-bridge режет), поэтому поддомен вешать на **host-run** туннель — тот, что
-запущен бинарём на хосте и уже роутит в `localhost` (как `lift-solana.technokod.kz` → `:3090`).
+- **Tunnel:** `crm-omnicomm`, id `28e49d19-a828-498e-92e0-7b6fea4aad08`
+- **Origin-cert:** `~/.cloudflared/cert.pem` (выдан `cloudflared tunnel login` для зоны technokod.kz)
+- **Креды туннеля:** `~/.cloudflared/28e49d19-….json`
+- **Конфиг:** `~/.cloudflared/config-crm-omnicomm.yml` (ingress `crm-omnicomm.technokod.kz` → `http://localhost:3026`)
+- **DNS:** CNAME `crm-omnicomm.technokod.kz` → `28e49d19-….cfargotunnel.com` (создан `cloudflared tunnel route dns`)
+- **Durable:** держится `deploy/run.sh` под cron (поднимет, если упадёт).
 
-Шаг (один раз):
-1. Cloudflare → **Zero Trust → Networks → Tunnels**.
-2. Открыть host-run туннель (Omnicomm-fleet или `lift-solana`) → вкладка **Public Hostname** → **Add**.
-3. Subdomain `crm-omnicomm`, Domain `technokod.kz`, Service **HTTP** `localhost:3026`.
-4. Save — DNS CNAME создаётся автоматически (proxied). Через ~1 мин:
-   `https://crm-omnicomm.technokod.kz` отдаёт лендинг.
+Запуск/перезапуск вручную:
+```bash
+flock -n /tmp/crm_omnicomm.lock /home/ubuntu/CRM-Omnicomm/deploy/run.sh
+```
 
-Альтернатива (свой выделенный туннель, изоляция проекта):
-Create tunnel → name `crm-omnicomm` → скопировать токен → на хосте
-`cloudflared tunnel --no-autoupdate run --token <TOKEN>` под flock; затем тот же Public Hostname.
+### Гочи (важно)
+- **`--protocol http2` обязателен:** дефолтный QUIC за этим провайдером отваливает датаграммы
+  («accept stream listener failure» → туннель выходит).
+- **`--no-prechecks` обязателен:** стартовый precheck хардфейлит из-за недоступного region2
+  (region1 fra/ala подключается нормально) и роняет процесс в фоне.
+- **pkill self-kill:** НЕ делать `pkill -f "config-crm-omnicomm.yml"` в inline-команде —
+  паттерн совпадает с argv самого шелла (bash -c …) и убивает его (exit 144), cloudflared не стартует.
+  В `run.sh` (файл-скрипт) `pgrep -f` безопасен: в argv только путь скрипта.
+
+### Воссоздать с нуля (если нужно)
+```bash
+cloudflared tunnel login                       # браузер-авторизация зоны technokod.kz → cert.pem
+cloudflared tunnel create crm-omnicomm
+cloudflared tunnel route dns crm-omnicomm crm-omnicomm.technokod.kz
+# config-crm-omnicomm.yml с ingress → localhost:3026, затем run.sh
+```

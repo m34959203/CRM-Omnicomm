@@ -18,12 +18,12 @@ if ! curl -sf "http://localhost:$PORT/api/health" >/dev/null 2>&1; then
   echo "$PORT" > "$LOGDIR/crm-omnicomm.port"
 fi
 
-# --- Публичный CF quick-туннель (ссылка квази-эфемерна, хранится в .url) ---
-if ! pgrep -f "cloudflared tunnel --url http://localhost:$PORT" >/dev/null 2>&1; then
-  echo "[$(date '+%F %T')] (re)start cloudflared for :$PORT" >> "$LOGDIR/crm-omnicomm-cf.log"
-  nohup /home/ubuntu/bin/cloudflared tunnel --url "http://localhost:$PORT" \
-    >> "$LOGDIR/crm-omnicomm-cf.log" 2>&1 &
-  sleep 8
-  grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "$LOGDIR/crm-omnicomm-cf.log" \
-    | tail -1 > "$LOGDIR/crm-omnicomm.url" || true
+# --- Выделенный именованный CF-туннель → crm-omnicomm.technokod.kz ---
+# protocol http2: QUIC-датаграммы за этим провайдером отваливаются.
+CF_CFG="/home/ubuntu/.cloudflared/config-crm-omnicomm.yml"
+if ! pgrep -f "config-crm-omnicomm.yml" >/dev/null 2>&1; then
+  echo "[$(date '+%F %T')] (re)start cloudflared crm-omnicomm" >> "$LOGDIR/crm-omnicomm-cf.log"
+  setsid /home/ubuntu/bin/cloudflared --no-autoupdate --no-prechecks --protocol http2 tunnel \
+    --config "$CF_CFG" run crm-omnicomm >> "$LOGDIR/crm-omnicomm-cf.log" 2>&1 < /dev/null &
 fi
+echo "crm-omnicomm.technokod.kz" > "$LOGDIR/crm-omnicomm.url"

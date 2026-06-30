@@ -8,8 +8,7 @@
 
 ## Демо
 
-- **Live (квази-эфемерный URL):** см. `/home/ubuntu/logs/crm-omnicomm.url` на сервере
-- **Постоянный домен:** `crm-omnicomm.technokod.kz` — после добавления Public Hostname в Cloudflare (см. [deploy/DEPLOY.md](deploy/DEPLOY.md))
+- **Live:** https://crm-omnicomm.technokod.kz (выделенный CF-туннель, durable через cron)
 - Демо-доступ (пароль `demo1234`): `admin@` / `manager@` / `support@` / `installer@` / `boss@omnicomm.kz`
 
 ## Состав
@@ -52,8 +51,8 @@ UI: открой корень `/` (лендинг) → дашборд / клик
 
 ## Деплой
 
-Раннер `deploy/run.sh` под `cron + flock` держит API+UI на `:3026` и публичный CF-туннель.
-Поддомен `crm-omnicomm.technokod.kz` — один шаг в дашборде Cloudflare: [deploy/DEPLOY.md](deploy/DEPLOY.md).
+Раннер `deploy/run.sh` под `cron + flock` держит API+UI на `:3026` и выделенный CF-туннель
+`crm-omnicomm.technokod.kz` (http2, no-prechecks). Детали и гочи: [deploy/DEPLOY.md](deploy/DEPLOY.md).
 
 ## Лицензия
 
