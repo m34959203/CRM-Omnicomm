@@ -2,57 +2,66 @@
 
 [![Build](https://img.shields.io/github/actions/workflow/status/m34959203/CRM-Omnicomm/ci.yml?branch=main)](https://github.com/m34959203/CRM-Omnicomm/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Stack](https://img.shields.io/badge/stack-Node%20·%20Express%20·%20SQLite%20→%20PostgreSQL-black)]()
+[![Stack](https://img.shields.io/badge/stack-Next.js%2016%20·%20PostgreSQL%2016-black)]()
 
-> CRM мониторинга транспорта Omnicomm Alliance KZ: клиенты, объекты, заявки, контроль монтажников, биллинг.
+> CRM дилера мониторинга транспорта (Omnicomm Alliance KZ): клиенты → оборудование → сервис →
+> абонентский биллинг. Аналог «Аскан: МТ» без 1С, с Omnicomm-нативной интеграцией и РК-локализацией.
 
-## Демо
+## Контекст
 
-- **Live:** https://crm-omnicomm.technokod.kz (выделенный CF-туннель, durable через cron)
+Заказчику предложили 1С-решение «Аскан: Мониторинг транспорта». Мы строим полноценный аналог
+с козырями, которых у Аскан нет: интеграция с Omnicomm Online (объекты, телеметрия,
+**автоблокировка должников**), казахстанская первичка (НДС 16%, АВР Р-1, ЭСФ-цепочка), RU/KK UI,
+PWA техника с подписью клиента. Обоснование и этапы: [docs/ASCAN-PARITY-PLAN.md](docs/ASCAN-PARITY-PLAN.md).
+
+## Состояние
+
+Этапы 0–7 роадмапа **реализованы** в `app/` (Next.js 16 + PostgreSQL 16): справочники и CRUD,
+интеграция Omnicomm Online (импорт абонбазы, консервация, автоблокировка должников), биллинг v2
+(посуточно/подписки/разовые, двуязычные PDF, 1С-выгрузка), сервисный контур (заявки → наряды →
+акты ТО), PWA техника, сдельная ЗП, техподдержка, отчёты (`/reports/*`), дашборд руководителя,
+карточка клиента с операциями над парком, i18n RU/KK с переключателем. Тестовые прогоны:
+`npm run test:billing` (22), `test:act-close` (19), `test:auto-block` (19), `test:payroll` (14),
+`test:notify` (8). В бэклоге: e-mail-рассылка расчётных документов, прямой API ИС ЭСФ (ЭЦП НУЦ РК),
+Kaspi Business, Wialon, Power BI-фид. Детали: [docs/roadmap.md](docs/roadmap.md).
+
+## Демо (легаси-MVP)
+
+- **Live:** https://crm-omnicomm.technokod.kz (crm-backend, выделенный CF-туннель)
 - Демо-доступ (пароль `demo1234`): `admin@` / `manager@` / `support@` / `installer@` / `boss@omnicomm.kz`
 
 ## Состав
 
 ```
-crm-backend/            Рабочий backend (Node.js + Express + SQLite), 30 эндпоинтов, 28 smoke-тестов
-liftplatform-omnicomm/  Пакет адаптации на базе LiftPlatform (Next.js + PostgreSQL): 13 миграций, 18 API-роутов, UI, интеграции
-ui/                     HTML-прототипы: index (лендинг), dashboard (макет заказчика), prototype (кликабельный), roadmap
-docs/                   Анализ потребности, техпроект, gap-анализы, рабочий документ разработки, TZ-COVERAGE
-deploy/                 run.sh (cron+flock-раннер) + DEPLOY.md (поддомен technokod.kz)
+app/                    ОСНОВНАЯ РАЗРАБОТКА: Next.js 16 + PostgreSQL 16 (этапы 0–7 роадмапа)
+crm-backend/            Легаси-MVP (Express + SQLite), прод :3026 — живёт до cutover
+liftplatform-omnicomm/  Архив проектных решений (SQL-миграции, роуты) — не запускается
+ui/                     HTML-прототипы (лендинг, макеты)
+docs/                   ASCAN-PARITY-PLAN, DATA-MODEL, architecture, roadmap, setup, аудиты (ascan/)
+deploy/                 run.sh (cron+flock) + DEPLOY.md
+download/ascan_audit/   Аудит демо-базы Аскан со скринами (PDF)
 ```
 
-## Решение
+## Документация
 
-Единое окно для сервисной компании Omnicomm: клиенты → объекты с оборудованием (GPS/датчики) → заявки и выезды монтажников с геолокацией и фотоотчётами → сквозной поток **продажа → заказ-наряд → Акт ТО → запуск биллинга → счета абонплаты**. Бизнес-правила из ТЗ зашиты (нет результата → нельзя закрыть; монтаж без фото → нельзя «Выполнена»).
+| Документ | Что там |
+|---|---|
+| [docs/ASCAN-PARITY-PLAN.md](docs/ASCAN-PARITY-PLAN.md) | план разработки: gap-анализ, этапы, РК-адаптация, риски |
+| [docs/DATA-MODEL.md](docs/DATA-MODEL.md) | целевая схема PostgreSQL (DDL по доменам) |
+| [docs/architecture.md](docs/architecture.md) | целевая архитектура, принципы, гочи Omnicomm |
+| [docs/roadmap.md](docs/roadmap.md) | этапы 0–7 с чек-листами |
+| [docs/setup.md](docs/setup.md) | локальный запуск app/ и легаси |
+| [docs/ascan/](docs/ascan/) | разбор конкурента: выжимка встречи, карта функционала, транскрипт |
 
-Два пути реализации:
-- **crm-backend** — самодостаточный рабочий MVP на свободном ПО (запускается сразу, SQLite→PostgreSQL).
-- **liftplatform-omnicomm** — продакшн-путь: форк LiftPlatform (тот же стек, почти идентичный домен) + миграции/роуты, которых в нём нет (этапы выезда, телефония, абонплата). См. [docs/TZ-COVERAGE.md](liftplatform-omnicomm/docs/TZ-COVERAGE.md).
-
-## Quick Start (рабочий backend)
+## Quick Start
 
 ```bash
-cd crm-backend
-npm install
-npm run seed     # демо-данные
-npm start        # API + UI на http://localhost:3000  (на сервере PORT=3026)
-npm run smoke    # 28 проверок: продажа → наряд → Акт ТО → биллинг
+# основная разработка (app/) — см. docs/setup.md
+cd app && npm install && npm run db:migrate && npm run db:seed && npm run dev   # :3027
+
+# легаси-MVP
+cd crm-backend && npm install && npm run seed && npm start   # :3000, smoke: npm run smoke
 ```
-
-UI: открой корень `/` (лендинг) → дашборд / кликабельный прототип / роадмап.
-
-## Стек
-
-- **Backend:** Node.js + Express, SQLite (better-sqlite3) → PostgreSQL в проде
-- **Auth:** JWT + bcrypt, 7 ролей из ТЗ
-- **Загрузка фото:** multer (локально → MinIO/S3 в проде)
-- **Прод-путь:** Next.js 16 + PostgreSQL (liftplatform-omnicomm)
-- **Хостинг:** VPS + Cloudflare Tunnel (поддомен technokod.kz)
-
-## Деплой
-
-Раннер `deploy/run.sh` под `cron + flock` держит API+UI на `:3026` и выделенный CF-туннель
-`crm-omnicomm.technokod.kz` (http2, no-prechecks). Детали и гочи: [deploy/DEPLOY.md](deploy/DEPLOY.md).
 
 ## Лицензия
 
