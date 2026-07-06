@@ -39,6 +39,14 @@ export async function GET(req: Request) {
       ? (s.resolutions as Record<string, string>)[String(r.resolution)] ?? r.resolution
       : null,
   }));
+  const clientName = clientId
+    ? (await query<{ name: string }>(`SELECT name FROM clients WHERE id = $1::uuid`, [clientId]))[0]
+        ?.name ?? clientId
+    : "";
+  const params: [string, string][] = [];
+  if (clientName) params.push([`${s.client}:`, clientName]);
+  if (status) params.push([`${s.status}:`, (s.ticketStatuses as Record<string, string>)[status] ?? status]);
+  if (channel) params.push([`${s.channel}:`, (s.channels as Record<string, string>)[channel] ?? channel]);
   return excelResponse(
     s.ticketsTitle,
     [
@@ -53,6 +61,7 @@ export async function GET(req: Request) {
       { header: s.createdAt, key: "created_at", width: 17 },
       { header: s.closedAt, key: "closed_at", width: 17 },
     ],
-    mapped
+    mapped,
+    { title: s.ticketsTitle, params }
   );
 }

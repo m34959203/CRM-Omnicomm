@@ -33,6 +33,13 @@ export async function GET(req: Request) {
     ...r,
     direction: (s.directions as Record<string, string>)[String(r.direction)] ?? r.direction,
   }));
+  const clientName = clientId
+    ? (await query<{ name: string }>(`SELECT name FROM clients WHERE id = $1::uuid`, [clientId]))[0]
+        ?.name ?? clientId
+    : "";
+  const params: [string, string][] = [];
+  if (clientName) params.push([`${s.client}:`, clientName]);
+  if (direction) params.push([`${s.direction}:`, (s.directions as Record<string, string>)[direction] ?? direction]);
   return excelResponse(
     s.callsTitle,
     [
@@ -45,6 +52,7 @@ export async function GET(req: Request) {
       { header: s.result, key: "result", width: 36 },
       { header: s.registeredBy, key: "registered_by", width: 24 },
     ],
-    mapped
+    mapped,
+    { title: s.callsTitle, params }
   );
 }

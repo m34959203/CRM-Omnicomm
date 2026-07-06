@@ -41,6 +41,14 @@ export async function GET(req: Request) {
     priority: (d.priorities as Record<string, string>)[String(r.priority)] ?? r.priority,
     status: (d.requestStatuses as Record<string, string>)[String(r.status)] ?? r.status,
   }));
+  const clientName = clientId
+    ? (await query<{ name: string }>(`SELECT name FROM clients WHERE id = $1::uuid`, [clientId]))[0]
+        ?.name ?? clientId
+    : "";
+  const params: [string, string][] = [];
+  if (clientName) params.push([`${d.client}:`, clientName]);
+  if (status) params.push([`${d.status}:`, (d.requestStatuses as Record<string, string>)[status] ?? status]);
+  if (type) params.push([`${d.type}:`, (d.requestTypes as Record<string, string>)[type] ?? type]);
   return excelResponse(
     d.requestsTitle,
     [
@@ -57,6 +65,7 @@ export async function GET(req: Request) {
       { header: d.createdAt, key: "created_at", width: 17 },
       { header: d.resultComment, key: "result_comment", width: 40 },
     ],
-    mapped
+    mapped,
+    { title: d.requestsTitle, params }
   );
 }

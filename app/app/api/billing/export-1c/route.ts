@@ -1,6 +1,6 @@
 import { query } from "@/lib/db";
 import { requireRole, authErrorResponse } from "@/lib/auth";
-import { excelResponse } from "@/lib/excel";
+import { excelResponse, periodRu } from "@/lib/excel";
 
 const ROLES = ["admin", "accounting", "head"] as const;
 
@@ -51,10 +51,14 @@ export async function GET(req: Request) {
       { header: "Контрагент", key: "counterparty", width: 40 },
       { header: "БИН/ИИН", key: "bin_iin", width: 16 },
       { header: "Услуга", key: "service", width: 50 },
-      { header: "Сумма без НДС", key: "amount_wo_vat", width: 16 },
-      { header: "НДС", key: "vat", width: 14 },
-      { header: "Итого", key: "total", width: 16 },
+      { header: "Сумма без НДС", key: "amount_wo_vat", width: 16, money: true },
+      { header: "НДС", key: "vat", width: 14, money: true },
+      { header: "Итого", key: "total", width: 16, money: true },
     ],
-    rows.map((r) => ({ ...r, service }))
+    rows.map((r) => ({ ...r, service })),
+    {
+      title: "Реализации для загрузки в 1С:Бухгалтерию",
+      period: periodRu(period),
+    }
   );
 }

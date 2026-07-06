@@ -16,11 +16,12 @@ export async function GET() {
     "Ведомость расчётов",
     [
       { header: "Клиент", key: "client_name", width: 40 },
-      { header: "Начислено", key: "billed", width: 16 },
-      { header: "Оплачено", key: "paid", width: 16 },
-      { header: "Долг", key: "debt", width: 16 },
+      { header: "Начислено", key: "billed", width: 16, money: true },
+      { header: "Оплачено", key: "paid", width: 16, money: true },
+      { header: "Долг", key: "debt", width: 16, money: true },
       { header: "Неоплачено с", key: "oldest_unpaid_due", width: 14 },
     ],
-    sheet.map((s) => ({ ...s, oldest_unpaid_due: s.oldest_unpaid_due ?? "" }))
+    sheet.map((s) => ({ ...s, oldest_unpaid_due: s.oldest_unpaid_due ?? "" })),
+    { title: "Ведомость расчётов с клиентами" }
   );
 }

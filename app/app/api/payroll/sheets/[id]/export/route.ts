@@ -1,6 +1,6 @@
 import { query } from "@/lib/db";
 import { requireRole, authErrorResponse } from "@/lib/auth";
-import { excelResponse } from "@/lib/excel";
+import { excelResponse, dateRu } from "@/lib/excel";
 import { t } from "@/lib/i18n";
 import { PAYROLL_READ_ROLES } from "@/lib/payroll/common";
 
@@ -49,14 +49,18 @@ export async function GET(
     [
       { header: p.performer, key: "performer", width: 30 },
       { header: p.actsCount, key: "acts_count", width: 10 },
-      { header: p.workAmount, key: "work_amount", width: 14 },
-      { header: p.salaryAmount, key: "salary_amount", width: 14 },
-      { header: p.bonusAmount, key: "bonus_amount", width: 14 },
-      { header: p.compensationAmount, key: "compensation_amount", width: 14 },
-      { header: p.deductionAmount, key: "deduction_amount", width: 14 },
-      { header: p.total, key: "total", width: 14 },
+      { header: p.workAmount, key: "work_amount", width: 14, money: true },
+      { header: p.salaryAmount, key: "salary_amount", width: 14, money: true },
+      { header: p.bonusAmount, key: "bonus_amount", width: 14, money: true },
+      { header: p.compensationAmount, key: "compensation_amount", width: 14, money: true },
+      { header: p.deductionAmount, key: "deduction_amount", width: 14, money: true },
+      { header: p.total, key: "total", width: 14, money: true },
       { header: p.thresholdMet, key: "threshold_met", width: 10 },
     ],
-    mapped
+    mapped,
+    {
+      title: p.sheetTitle,
+      period: `${dateRu(sheet.period_start)} – ${dateRu(sheet.period_end)}`,
+    }
   );
 }

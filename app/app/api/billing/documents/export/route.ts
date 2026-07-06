@@ -1,6 +1,6 @@
 import { query } from "@/lib/db";
 import { requireRole, authErrorResponse } from "@/lib/auth";
-import { excelResponse } from "@/lib/excel";
+import { excelResponse, periodRu } from "@/lib/excel";
 
 const READ_ROLES = ["admin", "manager", "accounting", "head", "boss"] as const;
 
@@ -10,6 +10,17 @@ const KIND_LABEL: Record<string, string> = {
   one_time_invoice: "Счёт (разовый)",
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  to_accrue: "к начислению",
+  prepared: "подготовлен",
+  issued: "выставлен",
+  sent: "отправлен",
+  partial: "частичная оплата",
+  paid: "оплачен",
+  overdue: "просрочен",
+  cancelled: "отменён",
+};
+
 export async function GET(req: Request) {
   try {
     await requireRole([...READ_ROLES]);
@@ -17,6 +28,9 @@ export async function GET(req: Request) {
     return authErrorResponse(e) ?? Response.json({ error: "server" }, { status: 500 });
   }
   const p = new URL(req.url).searchParams;
+  const periodParam = p.get("period") || "";
+  const kindParam = p.get("kind") || "";
+  const statusParam = p.get("status") || "";
   const rows = await query<Record<string, unknown>>(
     `SELECT d.number, d.kind, c.name AS client_name,
             to_char(d.period_start, 'YYYY-MM') AS period,
@@ -30,7 +44,7 @@ export async function GET(req: Request) {
        AND ($2::text IS NULL OR d.kind = $2)
        AND ($3::text IS NULL OR d.status = $3)
      ORDER BY d.created_at DESC`,
-    [p.get("period") || null, p.get("kind") || null, p.get("status") || null]
+    [periodParam || null, kindParam || null, statusParam || null]
   );
   return excelResponse(
     "Расчётные документы",
@@ -39,15 +53,29 @@ export async function GET(req: Request) {
       { header: "Тип", key: "kind", width: 14 },
       { header: "Клиент", key: "client_name", width: 36 },
       { header: "Период", key: "period", width: 10 },
-      { header: "Начислено", key: "subtotal", width: 14 },
-      { header: "Скидка", key: "discount", width: 12 },
-      { header: "Предоплата", key: "prepaid", width: 12 },
-      { header: "НДС", key: "vat", width: 12 },
-      { header: "Итого", key: "total", width: 14 },
-      { header: "Оплачено", key: "paid", width: 14 },
+      { header: "Начислено", key: "subtotal", width: 14, money: true },
+      { header: "Скидка", key: "discount", width: 12, money: true },
+      { header: "Предоплата", key: "prepaid", width: 12, money: true },
+      { header: "НДС", key: "vat", width: 12, money: true },
+      { header: "Итого", key: "total", width: 14, money: true },
+      { header: "Оплачено", key: "paid", width: 14, money: true },
       { header: "Статус", key: "status", width: 14 },
       { header: "Создан", key: "created", width: 12 },
     ],
-    rows.map((r) => ({ ...r, kind: KIND_LABEL[String(r.kind)] ?? r.kind }))
+    rows.map((r) => ({
+      ...r,
+      kind: KIND_LABEL[String(r.kind)] ?? r.kind,
+      status: STATUS_LABEL[String(r.status)] ?? r.status,
+    })),
+    {
+      title: "Расчётные документы",
+      period: periodParam ? periodRu(periodParam) : undefined,
+      params: [
+        ...(kindParam ? [["Тип:", KIND_LABEL[kindParam] ?? kindParam] as [string, string]] : []),
+        ...(statusParam
+          ? [["Статус:", STATUS_LABEL[statusParam] ?? statusParam] as [string, string]]
+          : []),
+      ],
+    }
   );
 }

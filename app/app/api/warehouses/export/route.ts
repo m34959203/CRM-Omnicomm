@@ -34,6 +34,7 @@ export async function GET() {
       { header: "Поставщик", key: "supplier", width: 26 },
       { header: "Активен", key: "active", width: 10 },
     ],
-    rows.map((r) => ({ ...r, type: TYPE_RU[r.type as string] ?? r.type }))
+    rows.map((r) => ({ ...r, type: TYPE_RU[r.type as string] ?? r.type })),
+    { title: "Склады" }
   );
 }

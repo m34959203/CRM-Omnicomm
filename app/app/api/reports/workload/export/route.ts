@@ -1,6 +1,6 @@
 import { query } from "@/lib/db";
 import { requireRole, authErrorResponse } from "@/lib/auth";
-import { excelResponse } from "@/lib/excel";
+import { excelResponse, periodRu } from "@/lib/excel";
 import { workloadReport } from "@/lib/reports/workload";
 import { REPORT_READ_ROLES } from "@/lib/reports/common";
 import { currentAlmatyPeriod } from "@/lib/billing/dates";
@@ -26,8 +26,9 @@ export async function GET(req: Request) {
       { header: d.reports.performer, key: "full_name", width: 32 },
       { header: d.reports.plannedOrders, key: "planned_orders", width: 24 },
       { header: d.reports.closedActs, key: "closed_acts", width: 24 },
-      { header: d.reports.pieceAmount, key: "piece_amount", width: 22 },
+      { header: d.reports.pieceAmount, key: "piece_amount", width: 22, money: true },
     ],
-    rows as unknown as Record<string, unknown>[]
+    rows as unknown as Record<string, unknown>[],
+    { title: d.reports.workloadTitle, period: periodRu(period) }
   );
 }

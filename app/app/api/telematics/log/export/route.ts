@@ -32,6 +32,10 @@ export async function GET(req: Request) {
       { header: "Данные", key: "payload", width: 40 },
       { header: "мс", key: "duration_ms", width: 8 },
     ],
-    rows
+    rows,
+    {
+      title: "Журнал синхронизации",
+      params: errorsOnly ? [["Отбор:", "только ошибки"]] : [],
+    }
   );
 }

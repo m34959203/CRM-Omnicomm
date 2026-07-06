@@ -37,6 +37,7 @@ export async function GET() {
       { header: "Статус", key: "status", width: 16 },
       { header: "Размещение", key: "location", width: 28 },
     ],
-    rows.map((r) => ({ ...r, status: STATUS_RU[r.status as string] ?? r.status }))
+    rows.map((r) => ({ ...r, status: STATUS_RU[r.status as string] ?? r.status })),
+    { title: "SIM-карты" }
   );
 }

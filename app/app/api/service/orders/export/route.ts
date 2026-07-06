@@ -37,6 +37,13 @@ export async function GET(req: Request) {
     ...r,
     status: (d.orderStatuses as Record<string, string>)[String(r.status)] ?? r.status,
   }));
+  const clientName = clientId
+    ? (await query<{ name: string }>(`SELECT name FROM clients WHERE id = $1::uuid`, [clientId]))[0]
+        ?.name ?? clientId
+    : "";
+  const params: [string, string][] = [];
+  if (clientName) params.push([`${d.client}:`, clientName]);
+  if (status) params.push([`${d.status}:`, (d.orderStatuses as Record<string, string>)[status] ?? status]);
   return excelResponse(
     d.ordersTitle,
     [
@@ -51,6 +58,7 @@ export async function GET(req: Request) {
       { header: d.status, key: "status", width: 15 },
       { header: d.createdAt, key: "created_at", width: 17 },
     ],
-    mapped
+    mapped,
+    { title: d.ordersTitle, params }
   );
 }

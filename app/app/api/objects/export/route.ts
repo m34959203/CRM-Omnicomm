@@ -33,6 +33,7 @@ export async function GET() {
       { header: "VIN", key: "vin", width: 22 },
       { header: "Статус", key: "status", width: 10 },
     ],
-    rows.map((r) => ({ ...r, kind: KIND_RU[r.kind as string] ?? r.kind }))
+    rows.map((r) => ({ ...r, kind: KIND_RU[r.kind as string] ?? r.kind })),
+    { title: "Объекты мониторинга" }
   );
 }

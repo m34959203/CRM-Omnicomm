@@ -1,6 +1,6 @@
 import { query } from "@/lib/db";
 import { requireRole, authErrorResponse } from "@/lib/auth";
-import { excelResponse } from "@/lib/excel";
+import { excelResponse, periodRu } from "@/lib/excel";
 import { activityReport } from "@/lib/reports/activity";
 import { REPORT_READ_ROLES } from "@/lib/reports/common";
 import { currentAlmatyPeriod } from "@/lib/billing/dates";
@@ -32,6 +32,7 @@ export async function GET(req: Request) {
       { header: r.conservationDays, key: "conservation_days", width: 18 },
       { header: r.billableDays, key: "billable_days", width: 18 },
     ],
-    rows as unknown as Record<string, unknown>[]
+    rows as unknown as Record<string, unknown>[],
+    { title: r.activityTitle, period: periodRu(period) }
   );
 }

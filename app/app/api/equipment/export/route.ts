@@ -51,6 +51,7 @@ export async function GET() {
       ...r,
       status: STATUS_RU[r.status as string] ?? r.status,
       billing_state: r.billing_state ? BILLING_RU[r.billing_state as string] ?? r.billing_state : null,
-    }))
+    })),
+    { title: "Оборудование" }
   );
 }

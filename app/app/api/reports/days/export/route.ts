@@ -33,7 +33,8 @@ export async function GET(req: Request) {
         { header: r.sinceDate, key: "received_at", width: 14 },
         { header: r.days, key: "days", width: 10 },
       ],
-      rows.map((x) => ({ ...x, received_at: fmtDate(x.received_at) }))
+      rows.map((x) => ({ ...x, received_at: fmtDate(x.received_at) })),
+      { title: `${r.daysTitle} — ${r.tabFromClients}` }
     );
   }
   if (tab === "supplier") {
@@ -47,7 +48,8 @@ export async function GET(req: Request) {
         { header: r.sinceDate, key: "since", width: 14 },
         { header: r.days, key: "days", width: 10 },
       ],
-      rows.map((x) => ({ ...x, since: fmtDate(x.since) }))
+      rows.map((x) => ({ ...x, since: fmtDate(x.since) })),
+      { title: `${r.daysTitle} — ${r.tabAtSupplier}` }
     );
   }
   const rows = await testingDays(query);
@@ -62,6 +64,7 @@ export async function GET(req: Request) {
       { header: r.sinceDate, key: "started_at", width: 14 },
       { header: r.days, key: "days", width: 10 },
     ],
-    rows.map((x) => ({ ...x, started_at: fmtDate(x.started_at) }))
+    rows.map((x) => ({ ...x, started_at: fmtDate(x.started_at) })),
+    { title: `${r.daysTitle} — ${r.tabTesting}` }
   );
 }

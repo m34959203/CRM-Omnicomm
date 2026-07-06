@@ -1,6 +1,6 @@
 import { query } from "@/lib/db";
 import { requireRole, authErrorResponse } from "@/lib/auth";
-import { excelResponse } from "@/lib/excel";
+import { excelResponse, dateRu } from "@/lib/excel";
 import { t } from "@/lib/i18n";
 import { PAYROLL_READ_ROLES } from "@/lib/payroll/common";
 
@@ -40,6 +40,22 @@ export async function GET(req: Request) {
     kind: (p.kinds as Record<string, string>)[String(r.kind)] ?? r.kind,
     amount: Number(r.amount),
   }));
+  const performerName = userId
+    ? (await query<{ full_name: string }>(`SELECT full_name FROM users WHERE id = $1::uuid`, [userId]))[0]
+        ?.full_name ?? userId
+    : "";
+  const params: [string, string][] = [];
+  if (performerName) params.push([`${p.performer}:`, performerName]);
+  if (kind) params.push([`${p.kind}:`, (p.kinds as Record<string, string>)[kind] ?? kind]);
+  if (unsheeted) params.push([`${p.inSheet}:`, p.no]);
+  const period =
+    dateFrom && dateTo
+      ? `${dateRu(dateFrom)} – ${dateRu(dateTo)}`
+      : dateFrom
+        ? `с ${dateRu(dateFrom)}`
+        : dateTo
+          ? `по ${dateRu(dateTo)}`
+          : undefined;
   return excelResponse(
     p.entriesTitle,
     [
@@ -48,9 +64,10 @@ export async function GET(req: Request) {
       { header: p.kind, key: "kind", width: 16 },
       { header: p.workType, key: "work_type", width: 30 },
       { header: p.reason, key: "reason", width: 30 },
-      { header: p.amount, key: "amount", width: 14 },
+      { header: p.amount, key: "amount", width: 14, money: true },
       { header: p.inSheet, key: "in_sheet", width: 14 },
     ],
-    mapped
+    mapped,
+    { title: p.entriesTitle, period, params }
   );
 }

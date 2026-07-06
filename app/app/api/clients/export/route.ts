@@ -32,6 +32,7 @@ export async function GET() {
       { header: "Менеджер", key: "manager", width: 24 },
       { header: "Активен", key: "active", width: 10 },
     ],
-    rows
+    rows,
+    { title: "Клиенты" }
   );
 }

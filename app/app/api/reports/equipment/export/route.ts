@@ -31,7 +31,14 @@ export async function GET(req: Request) {
         { header: d.equipment.billingState, key: "billing_state", width: 14 },
         { header: d.reports.daysHere, key: "days_here", width: 12 },
       ],
-      rows as Record<string, unknown>[]
+      rows as Record<string, unknown>[],
+      {
+        title: `${d.reports.equipmentTitle} — ${d.reports.details}`,
+        params: [
+          [`${d.reports.bucket}:`, (d.reports.buckets as Record<string, string>)[bucket] ?? bucket],
+          [`${d.reports.group}:`, key],
+        ],
+      }
     );
   }
 
@@ -45,6 +52,7 @@ export async function GET(req: Request) {
       { header: d.reports.usedCount, key: "used_count", width: 10 },
       { header: d.reports.total, key: "total", width: 10 },
     ],
-    rows.map((r) => ({ ...r, bucket_name: d.reports.buckets[r.bucket] }))
+    rows.map((r) => ({ ...r, bucket_name: d.reports.buckets[r.bucket] })),
+    { title: d.reports.equipmentTitle }
   );
 }
