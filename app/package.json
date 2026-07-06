@@ -10,6 +10,7 @@
     "lint": "eslint",
     "db:migrate": "tsx db/migrate.ts",
     "db:seed": "tsx db/seed.ts",
+    "db:seed-demo": "tsx scripts/seed-demo.ts",
     "db:migrate-legacy": "tsx scripts/migrate-from-sqlite.ts",
     "test:billing": "tsx scripts/test-billing.ts",
     "test:auto-block": "tsx scripts/test-auto-block.ts",
