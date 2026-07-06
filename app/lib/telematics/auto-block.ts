@@ -22,19 +22,28 @@ import { omnicommClientFor, writeSyncLog, type TelematicsServerRow } from "./ser
 
 export type AutoBlockEvent = {
   client_id: string;
-  action: "warning" | "block" | "unblock";
+  action: "warning" | "block" | "unblock" | "disable_objects" | "restore_objects";
   rule_id: string | null;
   debt_amount: number;
 };
 
-/** Вызов Omnicomm вынесен за инъекцию — в тестах подменяется заглушкой. */
+/** Вызовы Omnicomm вынесены за инъекции — в тестах подменяются заглушками. */
 export type SetBlockingFn = (
   server: TelematicsServerRow,
   p: { login: string; blocked: boolean; comment: string }
 ) => Promise<unknown>;
 
+export type SetDataCaptureFn = (
+  server: TelematicsServerRow,
+  externalUuid: string,
+  enabled: boolean
+) => Promise<unknown>;
+
 const defaultSetBlocking: SetBlockingFn = (server, p) =>
   omnicommClientFor(server).setUserBlocking(p);
+
+const defaultSetDataCapture: SetDataCaptureFn = (server, uuid, enabled) =>
+  omnicommClientFor(server).setDataCapture(uuid, enabled);
 
 type RuleRow = {
   id: string;
@@ -45,6 +54,7 @@ type RuleRow = {
   credit_grace_days: number;
   allowed_debt: string;
   warn_days_before: number;
+  disable_objects_after_days: number | null;
 };
 
 type AccountRow = TelematicsServerRow & { account_id: string; login: string };
@@ -124,19 +134,112 @@ async function applyBlocking(
   return ok > 0;
 }
 
+/**
+ * Отключение/восстановление парка должника (disable_objects_after_days):
+ * ESH → disabled (биллинг останавливается), объекты → archived, приём данных в СМ off.
+ * Восстанавливаются ТОЛЬКО единицы, отключённые автоматикой (source_type='auto_block').
+ */
+async function applyObjectsDisable(
+  clientId: string,
+  disable: boolean,
+  setDataCapture: SetDataCaptureFn
+): Promise<number> {
+  const equipment = disable
+    ? await query<{ id: string; object_id: string | null }>(
+        `SELECT id, object_id FROM equipment_items
+         WHERE client_id = $1::uuid AND status = 'installed'
+           AND billing_state IN ('active','conservation')`,
+        [clientId]
+      )
+    : await query<{ id: string; object_id: string | null }>(
+        `SELECT e.id, e.object_id FROM equipment_items e
+         JOIN equipment_state_history h ON h.equipment_id = e.id AND h.valid_to IS NULL
+         WHERE e.client_id = $1::uuid AND e.status = 'installed'
+           AND e.billing_state = 'disabled' AND h.source_type = 'auto_block'`,
+        [clientId]
+      );
+  if (equipment.length === 0) return 0;
+
+  for (const eq of equipment) {
+    await query(
+      `UPDATE equipment_state_history SET valid_to = now()
+       WHERE equipment_id = $1::uuid AND valid_to IS NULL`,
+      [eq.id]
+    );
+    await query(
+      `INSERT INTO equipment_state_history (equipment_id, object_id, client_id, state, valid_from, source_type)
+       VALUES ($1::uuid, $2::uuid, $3::uuid, $4, now(), 'auto_block')`,
+      [eq.id, eq.object_id, clientId, disable ? "disabled" : "active"]
+    );
+    await query(`UPDATE equipment_items SET billing_state = $2 WHERE id = $1::uuid`, [
+      eq.id,
+      disable ? "disabled" : "active",
+    ]);
+  }
+  await query(
+    `UPDATE monitoring_objects SET status = $2 WHERE client_id = $1::uuid AND status = $3`,
+    [clientId, disable ? "archived" : "active", disable ? "active" : "archived"]
+  );
+
+  // Приём данных в СМ — best effort по существующим привязкам.
+  const links = await query<TelematicsServerRow & { link_id: string; external_uuid: string }>(
+    `SELECT l.id AS link_id, l.external_uuid,
+            s.id, s.name, s.server_type, s.base_url, s.auth_login, s.auth_secret,
+            s.is_active, s.health_status, s.health_checked_at
+     FROM telematics_object_links l
+     JOIN monitoring_objects o ON o.id = l.object_id AND o.client_id = $1::uuid
+     JOIN telematics_servers s ON s.id = l.server_id AND s.is_active
+     WHERE l.sync_status = 'synced'`,
+    [clientId]
+  );
+  for (const link of links) {
+    const start = Date.now();
+    try {
+      await setDataCapture(link, link.external_uuid, !disable);
+      await query(
+        `UPDATE telematics_object_links SET data_reception_enabled = $2 WHERE id = $1::uuid`,
+        [link.link_id, !disable]
+      );
+      await writeSyncLog({
+        serverId: link.id,
+        operation: disable ? "disable_reception" : "enable_reception",
+        entityType: "telematics_object_link",
+        entityId: link.link_id,
+        status: "ok",
+        payload: { client_id: clientId, auto: true },
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      await writeSyncLog({
+        serverId: link.id,
+        operation: disable ? "disable_reception" : "enable_reception",
+        entityType: "telematics_object_link",
+        entityId: link.link_id,
+        status: "error",
+        errorMessage: (e as Error).message,
+        payload: { client_id: clientId, auto: true },
+        durationMs: Date.now() - start,
+      });
+    }
+  }
+  return equipment.length;
+}
+
 export async function runAutoBlocking(opts?: {
   /** Дата «сегодня» (YYYY-MM-DD, Алматы) — для тестов и пере-прогонов. */
   today?: string;
   setBlocking?: SetBlockingFn;
+  setDataCapture?: SetDataCaptureFn;
 }): Promise<AutoBlockEvent[]> {
   const today = opts?.today ?? almatyDate(new Date());
   const setBlocking = opts?.setBlocking ?? defaultSetBlocking;
+  const setDataCapture = opts?.setDataCapture ?? defaultSetDataCapture;
 
   const [sheet, rules] = await Promise.all([
     settlementSheet(query),
     query<RuleRow>(
       `SELECT id, scope, category_id, client_id, advance_grace_days, credit_grace_days,
-              allowed_debt::text, warn_days_before
+              allowed_debt::text, warn_days_before, disable_objects_after_days
        FROM blocking_rules WHERE is_active`
     ),
   ]);
@@ -178,7 +281,8 @@ export async function runAutoBlocking(opts?: {
     const isAutoBlocked = last?.action === "block" && last.performed_by === null;
     const isBlocked = last?.action === "block";
 
-    // Долг в пределах допустимого: разблокировать, если блокировали автоматически.
+    // Долг в пределах допустимого: разблокировать, если блокировали автоматически,
+    // и вернуть парк, если его отключала автоматика.
     if (row.debt <= allowedDebt) {
       if (isAutoBlocked) {
         const applied = await applyBlocking(row.client_id, false, row.debt, setBlocking);
@@ -189,6 +293,15 @@ export async function runAutoBlocking(opts?: {
             [rule.id, row.client_id, row.debt]
           );
           out.push({ client_id: row.client_id, action: "unblock", rule_id: rule.id, debt_amount: row.debt });
+        }
+        const restored = await applyObjectsDisable(row.client_id, false, setDataCapture);
+        if (restored > 0) {
+          await query(
+            `INSERT INTO blocking_events (rule_id, client_id, action, debt_amount, performed_by, note)
+             VALUES ($1::uuid, $2::uuid, 'restore_objects', $3, NULL, $4)`,
+            [rule.id, row.client_id, row.debt, `восстановлено единиц: ${restored}`]
+          );
+          out.push({ client_id: row.client_id, action: "restore_objects", rule_id: rule.id, debt_amount: row.debt });
         }
       }
       continue;
@@ -209,7 +322,26 @@ export async function runAutoBlocking(opts?: {
       m.billing_scheme === "advance" ? rule.advance_grace_days : rule.credit_grace_days;
 
     if (overdueDays > grace) {
-      if (isBlocked) continue; // уже заблокирован (авто или вручную)
+      if (isBlocked) {
+        // Уже заблокирован: проверяем срок авто-отключения парка («не проплатили —
+        // ТС отключается и не биллингуется», голос заказчика 04.07).
+        if (
+          isAutoBlocked &&
+          rule.disable_objects_after_days !== null &&
+          overdueDays > grace + rule.disable_objects_after_days
+        ) {
+          const disabled = await applyObjectsDisable(row.client_id, true, setDataCapture);
+          if (disabled > 0) {
+            await query(
+              `INSERT INTO blocking_events (rule_id, client_id, action, debt_amount, performed_by, note)
+               VALUES ($1::uuid, $2::uuid, 'disable_objects', $3, NULL, $4)`,
+              [rule.id, row.client_id, row.debt, `отключено единиц: ${disabled}; биллинг остановлен, объекты в архиве`]
+            );
+            out.push({ client_id: row.client_id, action: "disable_objects", rule_id: rule.id, debt_amount: row.debt });
+          }
+        }
+        continue;
+      }
       const applied = await applyBlocking(row.client_id, true, row.debt, setBlocking);
       if (applied) {
         await query(

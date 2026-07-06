@@ -23,7 +23,7 @@ PWA техника с подписью клиента. Обоснование и
 карточка клиента с операциями над парком, i18n RU/KK с переключателем. Тестовые прогоны:
 `npm run test:billing` (22), `test:act-close` (19), `test:auto-block` (19), `test:payroll` (14),
 `test:notify` (8). В бэклоге: e-mail-рассылка расчётных документов, прямой API ИС ЭСФ (ЭЦП НУЦ РК),
-Kaspi Business, Wialon, Power BI-фид. Детали: [docs/roadmap.md](docs/roadmap.md).
+Kaspi Business, Wialon (Power BI снят заказчиком 04.07). Детали: [docs/roadmap.md](docs/roadmap.md).
 
 ## Демо
 

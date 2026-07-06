@@ -136,6 +136,10 @@ export function RuleForm({
           {labels.allowedDebt}
           <input name="allowed_debt" type="number" min={0} step="0.01" defaultValue={0} className={input} />
         </label>
+        <label className="block text-sm font-medium">
+          Отключать ТС через, дн. после блокировки
+          <input name="disable_objects_after_days" type="number" min={0} placeholder="не отключать" className={input} />
+        </label>
         <label className={label}>
           {labels.warnDays}
           <input name="warn_days_before" type="number" min={0} defaultValue={3} className={input} />

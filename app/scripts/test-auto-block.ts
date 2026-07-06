@@ -173,6 +173,83 @@ async function main() {
   );
   check("6. blocking_events пуст для К6", Number(be6.n), 0);
 
+
+  // ---------- Кейс 6: авто-отключение парка (disable_objects_after_days) ----------
+  const dcCalls: { uuid: string; enabled: boolean }[] = [];
+  const dcStub = async (_s: unknown, uuid: string, enabled: boolean) => {
+    dcCalls.push({ uuid, enabled });
+  };
+  const c6d = await makeClient("К6 отключение парка", "credit", "user6");
+  await query(
+    `INSERT INTO blocking_rules (name, scope, client_id, advance_grace_days, credit_grace_days,
+       allowed_debt, warn_days_before, disable_objects_after_days)
+     VALUES ('К6 правило', 'client', $1, 5, 5, 1000, 3, 3)`,
+    [c6d]
+  );
+  const nom6 = (await query<{ id: string }>(
+    `INSERT INTO nomenclature (kind, name) VALUES ('equipment','Т6') RETURNING id`
+  ))[0].id;
+  const obj6 = (await query<{ id: string }>(
+    `INSERT INTO monitoring_objects (client_id, name, kind) VALUES ($1,'ТС-6','vehicle') RETURNING id`,
+    [c6d]
+  ))[0].id;
+  const eq6 = (await query<{ id: string }>(
+    `INSERT INTO equipment_items (nomenclature_id, serial_number, status, client_id, object_id, billing_state)
+     VALUES ($1,'SN-К6','installed',$2,$3,'active') RETURNING id`,
+    [nom6, c6d, obj6]
+  ))[0].id;
+  await query(
+    `INSERT INTO equipment_state_history (equipment_id, object_id, client_id, state, valid_from, source_type)
+     VALUES ($1,$2,$3,'active','2026-05-01T00:00:00+05','manual')`,
+    [eq6, obj6, c6d]
+  );
+  // Вручную отключённая единица — восстанавливаться НЕ должна.
+  const eq6m = (await query<{ id: string }>(
+    `INSERT INTO equipment_items (nomenclature_id, serial_number, status, client_id, object_id, billing_state)
+     VALUES ($1,'SN-К6М','installed',$2,$3,'disabled') RETURNING id`,
+    [nom6, c6d, obj6]
+  ))[0].id;
+  await query(
+    `INSERT INTO equipment_state_history (equipment_id, object_id, client_id, state, valid_from, source_type)
+     VALUES ($1,$2,$3,'disabled','2026-05-01T00:00:00+05','manual')`,
+    [eq6m, obj6, c6d]
+  );
+  await makeDebt(c6d, 9000, "2026-06-30"); // к 2026-07-10 просрочка 10 дн.
+
+  // Прогон А: блокировка (просрочка 10 > 5), парк ещё не трогаем (10 ≤ 5+3? нет: 10 > 8 —
+  // но отключение только для УЖЕ заблокированных, т.е. со второго прогона).
+  const ev6a = await runAutoBlocking({ today: TODAY, setBlocking: stub, setDataCapture: dcStub });
+  check("6а. первый прогон: block", ev6a.find((e) => e.client_id === c6d)?.action, "block");
+  // Прогон Б: уже заблокирован + просрочка 10 > 5+3 → disable_objects.
+  const ev6b = await runAutoBlocking({ today: TODAY, setBlocking: stub, setDataCapture: dcStub });
+  check("6б. второй прогон: disable_objects", ev6b.find((e) => e.client_id === c6d)?.action, "disable_objects");
+  const [eq6row] = await query<{ billing_state: string }>(
+    `SELECT billing_state FROM equipment_items WHERE id = $1`, [eq6]);
+  check("6б. единица disabled", eq6row.billing_state, "disabled");
+  const [obj6row] = await query<{ status: string }>(
+    `SELECT status FROM monitoring_objects WHERE id = $1`, [obj6]);
+  check("6б. объект archived", obj6row.status, "archived");
+  const [esh6] = await query<{ source_type: string }>(
+    `SELECT source_type FROM equipment_state_history WHERE equipment_id = $1 AND valid_to IS NULL`, [eq6]);
+  check("6б. открытый интервал auto_block", esh6.source_type, "auto_block");
+  // Прогон В: повторно — не дублируется.
+  const ev6c = await runAutoBlocking({ today: TODAY, setBlocking: stub, setDataCapture: dcStub });
+  check("6в. без дублей", ev6c.filter((e) => e.client_id === c6d).length, 0);
+  // Оплата → unblock + restore_objects; ручная единица не восстанавливается.
+  await query(`INSERT INTO payments (client_id, amount, method) VALUES ($1, 9000, 'bank')`, [c6d]);
+  const ev6d = await runAutoBlocking({ today: TODAY, setBlocking: stub, setDataCapture: dcStub });
+  const acts6 = ev6d.filter((e) => e.client_id === c6d).map((e) => e.action).sort();
+  check("6г. оплата: unblock + restore_objects", acts6, ["restore_objects", "unblock"]);
+  const [eq6after] = await query<{ billing_state: string }>(
+    `SELECT billing_state FROM equipment_items WHERE id = $1`, [eq6]);
+  check("6г. единица снова active", eq6after.billing_state, "active");
+  const [eq6mAfter] = await query<{ billing_state: string }>(
+    `SELECT billing_state FROM equipment_items WHERE id = $1`, [eq6m]);
+  check("6г. вручную отключённая НЕ восстановлена", eq6mAfter.billing_state, "disabled");
+  const [obj6after] = await query<{ status: string }>(
+    `SELECT status FROM monitoring_objects WHERE id = $1`, [obj6]);
+  check("6г. объект снова active", obj6after.status, "active");
+
   console.log(`\n${passed} passed, ${failed} failed`);
   await db.end();
 

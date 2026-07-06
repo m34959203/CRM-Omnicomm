@@ -47,9 +47,9 @@ export async function POST(req: Request) {
     const [row] = await q<{ id: string }>(
       `INSERT INTO blocking_rules
          (name, scope, category_id, client_id, advance_grace_days, credit_grace_days,
-          allowed_debt, warn_days_before, is_active)
+          allowed_debt, warn_days_before, is_active, disable_objects_after_days)
        VALUES ($1, $2, $3::uuid, $4::uuid, COALESCE($5, 0), COALESCE($6, 0),
-               COALESCE($7, 0), COALESCE($8, 3), COALESCE($9, true))
+               COALESCE($7, 0), COALESCE($8, 3), COALESCE($9, true), $10::int)
        RETURNING id`,
       [
         b.name.trim(), scope,
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
         scope === "client" ? b.client_id : null,
         b.advance_grace_days ?? null, b.credit_grace_days ?? null,
         b.allowed_debt ?? null, b.warn_days_before ?? null, b.is_active ?? null,
+        b.disable_objects_after_days || null,
       ]
     );
     await q(
