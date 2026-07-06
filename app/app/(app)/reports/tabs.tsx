@@ -6,13 +6,14 @@ export function ReportsTabs({
   active,
 }: {
   d: Dict;
-  active: "equipment" | "days" | "workload" | "activity";
+  active: "equipment" | "days" | "workload" | "activity" | "installers";
 }) {
   const tabs: [string, string, string][] = [
     ["equipment", "/reports/equipment", d.reports.tabEquipment],
     ["days", "/reports/days", d.reports.tabDays],
     ["workload", "/reports/workload", d.reports.tabWorkload],
     ["activity", "/reports/activity", d.reports.tabActivity],
+    ["installers", "/reports/installers", d.reports.tabInstallers],
   ];
   return (
     <div className="mt-4 flex gap-1 border-b border-line">

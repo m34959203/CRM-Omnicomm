@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { t } from "@/lib/i18n";
 import { query } from "@/lib/db";
+import { SimImportButton } from "./import-button";
 
 type Row = {
   id: string;
@@ -49,11 +50,28 @@ export default async function SimPage({
     [q.trim()]
   );
 
+  const operators = await query<{ id: string; name: string }>(
+    `SELECT id, name FROM sim_operators WHERE is_active ORDER BY name`
+  );
+  const importWarehouses = await query<{ id: string; name: string }>(
+    `SELECT id, name FROM warehouses WHERE is_active AND type = 'physical' ORDER BY name`
+  );
+
   return (
     <div>
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">{d.sim.title}</h1>
         <div className="flex items-center gap-2">
+          <SimImportButton
+            operators={operators}
+            warehouses={importWarehouses}
+            labels={{
+              button: d.sim.importExcel,
+              hint: d.sim.importHint,
+              save: d.common.save,
+              cancel: d.common.cancel,
+            }}
+          />
           <a
             href="/api/sim/export"
             className="rounded-md border border-line bg-card px-3 py-2 text-sm transition hover:border-accent hover:text-accent-ink"

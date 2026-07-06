@@ -5,6 +5,7 @@ import {
   REQUEST_TYPES,
   PHOTO_REQUIRED_TYPES,
 } from "@/lib/service/common";
+import { dueAtFor } from "@/lib/service/sla";
 
 /** Создание заявки ТО. Номер 'Z-000001' из seq_request_number. */
 export async function POST(req: Request) {
@@ -23,6 +24,9 @@ export async function POST(req: Request) {
     return Response.json({ error: "bad priority" }, { status: 400 });
   }
 
+  // due_at не задан вручную → рассчитываем по нормативу SLA типа заявки.
+  const dueAt = b.due_at || (await dueAtFor(b.type));
+
   const id = await tx(async (q) => {
     const [row] = await q<{ id: string; number: string }>(
       `INSERT INTO requests
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
       [
         b.client_id, b.object_id || null, b.type, b.priority || null, b.source || null,
         b.subject?.trim() || null, b.description?.trim() || null,
-        PHOTO_REQUIRED_TYPES.includes(b.type), b.due_at || null,
+        PHOTO_REQUIRED_TYPES.includes(b.type), dueAt,
         b.manager_id || null, b.support_id || null, b.installer_id || null,
       ]
     );

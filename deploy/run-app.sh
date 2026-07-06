@@ -50,3 +50,4 @@ echo "crm-app.technokod.kz" > "$LOGDIR/crm-omnicomm-app.url"
 #   0 6 28-31 * * ... {"kind":"act"} (в последний день месяца — проверка в самом джобе)
 #   */30 * * * * curl -s -X POST -H "X-Cron-Key: $KEY" localhost:3027/api/jobs/auto-block
 #   */5 * * * *  curl -s -X POST -H "X-Cron-Key: $KEY" localhost:3027/api/jobs/notify
+#   */15 * * * * curl -s -X POST -H "X-Cron-Key: $KEY" localhost:3027/api/jobs/overdue

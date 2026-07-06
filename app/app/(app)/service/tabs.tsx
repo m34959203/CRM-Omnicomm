@@ -6,7 +6,7 @@ export function ServiceTabs({
   active,
 }: {
   d: Dict;
-  active: "requests" | "orders" | "schedule" | "acts" | "testing" | "repairs";
+  active: "requests" | "orders" | "schedule" | "acts" | "testing" | "repairs" | "sla";
 }) {
   const tabs: [string, string, string][] = [
     ["requests", "/service/requests", d.service.tabRequests],
@@ -15,6 +15,7 @@ export function ServiceTabs({
     ["acts", "/service/acts", d.service.tabActs],
     ["testing", "/service/testing", d.service.tabTesting],
     ["repairs", "/service/repairs", d.service.tabRepairs],
+    ["sla", "/service/sla", d.service.tabSla],
   ];
   return (
     <div className="mt-4 flex gap-1 border-b border-line">

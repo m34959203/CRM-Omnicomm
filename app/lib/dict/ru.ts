@@ -66,6 +66,9 @@ export const ru = {
   },
   sim: {
     title: "SIM-карты",
+    importExcel: "Импорт из Excel",
+    importHint: "Файл оператора: колонки ICCID (или «Серийный»), MSISDN (или «Номер»), опционально «Тариф». Оператор и склад задаются ниже.",
+    importResult: "Импортировано: {created}, пропущено (дубли): {skipped}, ошибок: {errors}",
     icc: "ICCID",
     msisdn: "Номер (MSISDN)",
     operator: "Оператор",
@@ -147,6 +150,12 @@ export const ru = {
     tabActs: "Акты ТО",
     tabTesting: "Тестирование",
     tabRepairs: "Ремонт",
+    tabSla: "Нормативы",
+    slaType: "Тип заявки",
+    slaReaction: "Реакция, мин",
+    slaExecution: "Исполнение, ч",
+    slaActive: "Действует",
+    slaHint: "due_at новой заявки рассчитывается по нормативу, если срок не задан вручную; джоб просрочек помечает заявки и шлёт уведомления.",
     // общие поля
     number: "Номер",
     client: "Клиент",
@@ -637,6 +646,14 @@ export const ru = {
     tabDays: "Дни в размещении",
     tabWorkload: "Загруженность",
     tabActivity: "Активность",
+    tabInstallers: "Монтажники",
+    instActive: "Активных заявок",
+    instDone: "Закрыто актов",
+    instOverdue: "Просрочено",
+    instArrival: "Ср. прибытие, мин",
+    instWork: "Ср. работа, мин",
+    instRepeats: "Повторные выезды",
+    instQuality: "Качество, %",
     // сводный по оборудованию
     equipmentTitle: "Оборудование по размещениям",
     buckets: {
