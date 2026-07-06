@@ -25,10 +25,11 @@ PWA техника с подписью клиента. Обоснование и
 `test:notify` (8). В бэклоге: e-mail-рассылка расчётных документов, прямой API ИС ЭСФ (ЭЦП НУЦ РК),
 Kaspi Business, Wialon, Power BI-фид. Детали: [docs/roadmap.md](docs/roadmap.md).
 
-## Демо (легаси-MVP)
+## Демо
 
-- **Live:** https://crm-omnicomm.technokod.kz (crm-backend, выделенный CF-туннель)
-- Демо-доступ (пароль `demo1234`): `admin@` / `manager@` / `support@` / `installer@` / `boss@omnicomm.kz`
+- **Новая система (этапы 0–7):** https://crm-app.technokod.kz — Next.js 16 + PG, `deploy/run-app.sh`
+- **Легаси-MVP:** https://crm-omnicomm.technokod.kz (crm-backend, до cutover — см. deploy/DEPLOY.md)
+- Демо-доступ (пароль `demo1234`): `admin@` / `manager@` / `support@` / `installer@` (→ PWA `/m`) / `boss@omnicomm.kz`
 
 ## Состав
 

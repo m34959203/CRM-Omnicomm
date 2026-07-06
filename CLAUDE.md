@@ -16,10 +16,12 @@ CRM дилера мониторинга транспорта (Omnicomm Alliance 
 
 ## Структура
 
-- `app/` — **основная разработка** (Next.js 16 + PG). Вся новая работа — здесь.
-- `crm-backend/` — легаси-MVP (Express+SQLite), прод на :3026 до cutover. Не развивать, только фиксы.
+- `app/` — **основная система, этапы 0–7 реализованы** (Next.js 16 + PG). Прод: https://crm-app.technokod.kz.
+  Тесты: `npm run test:billing|test:act-close|test:payroll|test:auto-block|test:notify` (временные БД).
+  В dev `.env` стоит `NOTIFY_DRY_RUN=1` — для прода убрать. `auth_secret` телематики — plaintext (TODO шифрование).
+- `crm-backend/` — легаси-MVP (Express+SQLite), прод на :3026 до cutover (процедура в deploy/DEPLOY.md). Не развивать, только фиксы.
 - `liftplatform-omnicomm/` — архив проектных решений, не запускается. Только как референс.
-- `deploy/run.sh` — cron+flock раннер прод-инстанса + CF-туннель.
+- `deploy/run.sh` — раннер легаси; `deploy/run-app.sh` — раннер app/ (PG + next + туннель crm-app). Оба в cron+flock.
 
 ## Tech Stack (app/)
 

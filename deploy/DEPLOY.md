@@ -44,3 +44,18 @@ cloudflared tunnel create crm-omnicomm
 cloudflared tunnel route dns crm-omnicomm crm-omnicomm.technokod.kz
 # config-crm-omnicomm.yml с ingress → localhost:3026, затем run.sh
 ```
+
+## Новое приложение (app/, этапы 0–7) — crm-app.technokod.kz ✅
+
+- **Прод-URL:** https://crm-app.technokod.kz (Next.js 16, порт **3027**, PG-контейнер `crm-omnicomm-postgres` :5445)
+- **Tunnel:** `crm-omnicomm-app`, id `dd1a7e63-bb3f-4a40-aaba-211d2869040a`, конфиг `~/.cloudflared/config-crm-omnicomm-app.yml`
+- **Durable:** `deploy/run-app.sh` под cron+flock (*/3 мин + @reboot): PG → next start → cloudflared (те же гочи: `--protocol http2 --no-prechecks`)
+- **Деплой новой версии:** `cd app && git pull && npm ci && npm run db:migrate && npm run build && pkill -f "next start -p 3027"` — cron поднимет свежую сборку
+- **Логи:** `logs/crm-omnicomm-app.log`, `crm-omnicomm-app-cf.log`
+
+### Cutover основного домена (когда решим)
+1. Прогнать миграцию прод-данных: `cd app && npm run db:migrate-legacy -- ../crm-backend/crm.db` (идемпотентна, см. legacy_map).
+2. В `~/.cloudflared/config-crm-omnicomm.yml` сменить service на `http://localhost:3027`, перезапустить туннель `crm-omnicomm`.
+3. Убрать легаси-раннер `run.sh` из cron (туннель переносится в run-app.sh или остаётся в run.sh без node-части).
+4. Прод-чек: логин, карточка клиента, прогон биллинга за текущий месяц в dry-режиме (без рассылки).
+5. Прод-env: убрать `NOTIFY_DRY_RUN`, заполнить SMTP_*, TELEGRAM_BOT_TOKEN, OMNICOMM_* (учётка заказчика).

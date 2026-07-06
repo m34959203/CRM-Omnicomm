@@ -34,6 +34,16 @@ if ! curl -sf "http://localhost:$PORT/login" >/dev/null 2>&1; then
   echo "$PORT" > "$LOGDIR/crm-omnicomm-app.port"
 fi
 
+# --- Выделенный именованный CF-туннель → crm-app.technokod.kz ---
+# protocol http2 + no-prechecks: см. гочи в deploy/DEPLOY.md.
+CF_CFG="/home/ubuntu/.cloudflared/config-crm-omnicomm-app.yml"
+if ! pgrep -f "config-crm-omnicomm-app.yml" >/dev/null 2>&1; then
+  echo "[$(date '+%F %T')] (re)start cloudflared crm-omnicomm-app" >> "$LOGDIR/crm-omnicomm-app-cf.log"
+  setsid /home/ubuntu/bin/cloudflared --no-autoupdate --no-prechecks --protocol http2 tunnel \
+    --config "$CF_CFG" run crm-omnicomm-app >> "$LOGDIR/crm-omnicomm-app-cf.log" 2>&1 < /dev/null &
+fi
+echo "crm-app.technokod.kz" > "$LOGDIR/crm-omnicomm-app.url"
+
 # --- Cron-джобы приложения (биллинг/автоблокировка/уведомления) ---
 # Дёргаются отдельными cron-строками, ключ в app/.env (CRON_KEY):
 #   0 6 1 * *  curl -s -X POST -H "X-Cron-Key: $KEY" localhost:3027/api/jobs/billing -d '{"kind":"advance_invoice"}'
