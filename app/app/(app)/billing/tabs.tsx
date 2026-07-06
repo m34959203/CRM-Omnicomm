@@ -6,13 +6,14 @@ export function BillingTabs({
   active,
 }: {
   d: Dict;
-  active: "documents" | "run" | "tariffs" | "settlements";
+  active: "documents" | "run" | "tariffs" | "settlements" | "import";
 }) {
   const tabs: [string, string, string][] = [
     ["documents", "/billing/documents", d.billing.tabDocuments],
     ["run", "/billing/run", d.billing.tabRun],
     ["tariffs", "/billing/tariffs", d.billing.tabTariffs],
     ["settlements", "/billing/settlements", d.billing.tabSettlements],
+    ["import", "/billing/import", d.billing.tabImport],
   ];
   return (
     <div className="mt-4 flex gap-1 border-b border-line">

@@ -17,7 +17,8 @@
     "test:omnicomm": "tsx scripts/test-omnicomm.ts",
     "test:act-close": "tsx scripts/test-act-close.ts",
     "test:payroll": "tsx scripts/test-payroll.ts",
-    "test:notify": "tsx scripts/test-notify.ts"
+    "test:notify": "tsx scripts/test-notify.ts",
+    "test:payments-import": "tsx scripts/test-payments-import.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
