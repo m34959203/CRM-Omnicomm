@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  /* индустриальный утилитаризм: графитовый хром, светлая рабочая зона, сигнальный оранжевый */
+  --chrome: #191b20;
+  --chrome-raised: #22252c;
+  --chrome-line: #2e323b;
+  --chrome-text: #b9bec8;
+  --chrome-text-dim: #6d737f;
+
+  --paper: #f4f4f2;
+  --card: #ffffff;
+  --line: #e3e3df;
+  --ink: #1c1e22;
+  --ink-dim: #6b6f76;
+
+  --accent: #ff6a00;
+  --accent-ink: #cc5500;
+  --accent-soft: #fff0e6;
+
+  --ok: #1a7f4e;
+  --warn: #b7791f;
+  --danger: #c0392b;
+}
+
+@theme inline {
+  --color-chrome: var(--chrome);
+  --color-chrome-raised: var(--chrome-raised);
+  --color-chrome-line: var(--chrome-line);
+  --color-chrome-text: var(--chrome-text);
+  --color-chrome-dim: var(--chrome-text-dim);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-plex-sans), sans-serif;
+  --font-mono: var(--font-plex-mono), monospace;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-plex-sans), sans-serif;
+  font-feature-settings: "tnum" 1; /* табличные цифры: суммы и серийники ровными колонками */
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
